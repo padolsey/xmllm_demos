@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ClientProvider, stream, simple } from 'xmllm/client'
-import type { XMLElement } from 'xmllm/client'
+import type { XMLElement, HintType } from 'xmllm/client'
 
 const client = new ClientProvider('http://localhost:3124/api/stream')
 
@@ -138,7 +138,7 @@ export default function ComplexTypescript() {
         {
           clientProvider: client,
           model: ['togetherai:fast'],
-          hints: analysisHints
+          hints: analysisHints as unknown as HintType
         }
       ) as AnalysisResult;
 
