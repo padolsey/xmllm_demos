@@ -1,11 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ClientProvider, stream } from 'xmllm/client'
+import { stream } from '@/utils/xmllm'
 import { speciesDemo } from '../../../config/demos/species'
 import { SpeciesProfile } from '../../../components/SpeciesProfile'
-
-const clientProvider = new ClientProvider('http://localhost:3124/api/stream')
 
 export default function SpeciesGeneratorPage() {
   const [isGenerating, setIsGenerating] = useState(false)
@@ -22,9 +20,6 @@ export default function SpeciesGeneratorPage() {
         temperature: speciesDemo.temperature,
         max_tokens: speciesDemo.maxTokens,
         system: speciesDemo.system,
-        model: ['togetherai:fast', 'claude:fast', 'openai:fast']
-      }, {
-        clientProvider
       }).map((chunk: any) => {
         const data = chunk.species
         return speciesDemo.transform(data)

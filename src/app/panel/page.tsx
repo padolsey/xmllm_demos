@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ClientProvider, stream, ModelPreference } from 'xmllm/client'
+import { stream, ModelPreference } from '@/utils/xmllm'
 import { useTheme } from '../theme-provider'
-
-const clientProvider = new ClientProvider('http://localhost:3124/api/stream')
 
 // Available models configuration
 const MODEL_OPTIONS = [
@@ -44,7 +42,6 @@ interface PanelConfig {
 const DEFAULT_CONFIG: PanelConfig = {
   systemPrompt: '',
   messages: [{ role: 'user', content: '' }],
-  model: 'claude:fast',
   temperature: 0.7,
   maxTokens: 1000,
   topP: 1.0,
@@ -284,8 +281,7 @@ export default function Panel() {
             presence_penalty: config.presencePenalty,
             stop: config.stop ? config.stop.split(',').map(s => s.trim()) : undefined,
             ...(schemaConfig && { schema: schemaConfig.schema })
-          }, 
-          { clientProvider }
+          }
         )
 
         if (config.schema.enabled) {

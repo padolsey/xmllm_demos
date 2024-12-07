@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ClientProvider, stream, simple } from 'xmllm/client'
+import { stream, simple } from '@/utils/xmllm'
 import type { XMLElement, HintType } from 'xmllm/client'
-
-const client = new ClientProvider('http://localhost:3124/api/stream')
 
 // Define our domain types
 interface NewsArticle {
@@ -76,7 +74,6 @@ export default function ComplexTypescript() {
     // for await (
     //   const {color} of
     //     stream('List colors as <color>...</color>', {
-    //       clientProvider: client,
     //       model: {
     //         inherit: 'togetherai',
     //         name: 'Qwen/Qwen2.5-7B-Instruct-Turbo',
@@ -101,7 +98,6 @@ export default function ComplexTypescript() {
       const headlineStream = stream(
         'List 3 recent tech headlines. Format each as <headline>...</headline>',
         {
-          clientProvider: client,
           model: 'togetherai:fast'
         }
       )
@@ -136,7 +132,6 @@ export default function ComplexTypescript() {
         prompt,
         analysisSchema,
         {
-          clientProvider: client,
           model: ['togetherai:fast'],
           hints: analysisHints as unknown as HintType
         }
@@ -158,7 +153,6 @@ export default function ComplexTypescript() {
          Format as <summary>...</summary>`,
         {
           model: 'togetherai:good',
-          clientProvider: client,
           onChunk: (chunk: any) => {
             console.debug('Summary Chunk:', chunk);
           },

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { xmllm, stream, ClientProvider } from 'xmllm/client'
+import { xmllm, stream } from '@/utils/xmllm'
 import type { PipelineHelpers } from 'xmllm'
 
 // The complete XML string for simulation
@@ -128,7 +128,7 @@ function LiveProfile({ data }: { data: any }) {
   )
 }
 
-export function UserProfileDemo({ clientProvider }: { clientProvider: ClientProvider }) {
+export function UserProfileDemo() {
   const [xmlContent, setXmlContent] = useState('')
   const [parsedContent, setParsedContent] = useState<any>({})
   const [isPlaying, setIsPlaying] = useState(false)
@@ -176,7 +176,7 @@ export function UserProfileDemo({ clientProvider }: { clientProvider: ClientProv
             })) || []
           }
         })
-      ], clientProvider)
+      ])
 
       for await (const result of stream) {
         if (!mounted) return
@@ -223,8 +223,6 @@ export function UserProfileDemo({ clientProvider }: { clientProvider: ClientProv
           setXmlContent(prev => prev + rawChunk)
         },
         system: "You are a profile generator. Create engaging user profiles with colorful details. Do not over-focus on locale in determinising interests. Do not over-focus on job in determining hobbies."
-      }, {
-        clientProvider
       }).map((chunk: any) => chunk.user_profile).map((profile: any) => {
         profile.details = {
           ...(profile.details || {}),
@@ -263,7 +261,7 @@ export function UserProfileDemo({ clientProvider }: { clientProvider: ClientProv
     return () => {
       mounted = false
     }
-  }, [isPlaying, speed, chunkSize, useRealLLM, clientProvider])
+  }, [isPlaying, speed, chunkSize, useRealLLM])
 
   return (
     <div className="max-w-7xl mx-auto">

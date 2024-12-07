@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ClientProvider, stream } from 'xmllm/client'
-
-const clientProvider = new ClientProvider('http://localhost:3124/api/stream')
+import { stream } from '@/utils/xmllm'
 
 // Simulated chunks that will be fed to all streams
 const SIMULATED_CHUNKS = [
@@ -198,14 +196,20 @@ export default function ModesDemo() {
     startTimeRef.current = startTime
     
     // Create streams for each mode using mock provider
-    const modes = ['state_open', 'state_closed', 'root_open', 'root_closed'] as const
+    const modes = [
+      'state_open',
+      'state_closed',
+      'root_open',
+      'root_closed'
+    ] as const;
+
     const streams = modes.map(mode => 
       stream(prompt, {
         schema,
         clientProvider: mockStreamProvider,
         mode
       })
-    )
+    );
 
     try {
       await Promise.all(streams.map(async (s, i) => {

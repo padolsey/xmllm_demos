@@ -1,12 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ClientProvider, xmllm, stream } from 'xmllm/client'
+import { xmllm, stream } from '@/utils/xmllm'
 import { demos } from '@/config/demos'
 import type { DemoId } from '../../config/demos'
 import type { PipelineHelpers } from 'xmllm'
-
-const clientProvider = new ClientProvider('http://localhost:3124/api/stream')
 
 function* generateChunks(text: string, chunkSize: number) {
   let index = 0
@@ -65,8 +63,6 @@ export default function FluidDemo() {
             setXmlContent(prev => prev + rawChunk)
           },
           system: currentDemo.system
-        }, {
-          clientProvider
         }).map((chunk: any) => {
           const rootKey = Object.keys(currentDemo.schema)[0]
           const data = chunk[rootKey]
@@ -111,7 +107,7 @@ export default function FluidDemo() {
             console.log('Transformed result:', transformed)
             return transformed
           })
-        ], clientProvider)
+        ])
 
         try {
           console.log('Starting stream iteration')

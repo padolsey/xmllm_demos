@@ -4,10 +4,9 @@ import { useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { ClientProvider, xmllm, stream } from 'xmllm/client'
+import { xmllm, stream } from '@/utils/xmllm'
 import { useTheme } from '../theme-provider'
 
-const clientProvider = new ClientProvider('http://localhost:3124/api/stream')
 const DEFAULT_MODEL = 'togetherai:fast'
 
 // Just store the example code strings
@@ -44,16 +43,16 @@ const tests = {
       };
     }
   }
-], clientProvider);
+]);
 
 for await (const update of colorTracker) {
   setOutput(prev => prev + JSON.stringify(update, null, 2) + '\\n');
 }`
   },
 
-  pipelineChained: {
-    name: 'Pipeline: Chained Analysis',
-    description: 'Chain multiple prompts to build on previous responses',
+  sequentialAnalysis: {
+    name: 'Sequential: Scientist Analysis',
+    description: 'Chain multiple prompts to analyze a scientist and their work',
     code: `const analysis = xmllm(({ prompt, promptClosed }) => [
   // First prompt gets a scientist
   promptClosed('Name a scientist', {
@@ -89,18 +88,17 @@ for await (const update of colorTracker) {
       discovery
     };
   }
-], clientProvider);
+],);
 
 for await (const update of analysis) {
   setOutput(prev => prev + JSON.stringify(update, null, 2) + '\\n');
 }`
   },
 
-  stateOpen: {
-    name: 'State (Open) Mode',
-    description: 'Watch content grow with partial updates',
+  streamingThoughts: {
+    name: 'Stream Individual Thoughts',
+    description: 'Process complete thoughts one at a time as they arrive',
     code: `const storyStream = stream('Write a story with <scene>...</scene> tags', {
-  clientProvider,
   model: DEFAULT_MODEL,
   mode: 'state_open',  // Shows growing state including partials
   schema: {
@@ -113,24 +111,7 @@ for await (const update of storyStream) {
 }`
   },
 
-  rootClosed: {
-    name: 'Root (Closed) Mode',
-    description: 'Process complete elements as they arrive',
-    code: `const thoughtStream = stream('Share some deep thoughts', {
-  clientProvider,
-  model: DEFAULT_MODEL,
-  mode: 'root_closed',  // Shows each complete root element once
-  schema: {
-    thought: [String]
-  }
-});
-
-for await (const update of thoughtStream) {
-  setOutput(prev => prev + JSON.stringify(update, null, 2) + '\\n');
-}`
-  },
-
-  stateClosed: {
+  tweetAnalysis: {
     name: 'State (Closed) Mode',
     description: 'See complete state updates',
     code: `const analysis = await stream({
@@ -146,30 +127,6 @@ for await (const update of thoughtStream) {
       confidence: Number
     }]
   }
-}, {
-  clientProvider
-}).last();
-
-setOutput(JSON.stringify(analysis, null, 2));`
-  },
-
-  structuredAnalysis: {
-    name: 'Complex Schema Analysis',
-    description: 'Extract rich structured data with validation',
-    code: `const analysis = await stream({
-  prompt: 'Analyze this tweet: "Just saw the sweetest puppy!"',
-  model: DEFAULT_MODEL,
-  schema: {
-    sentiment: String,
-    topics: [String],
-    insights: [{
-      point: String,
-      reasoning: String,
-      confidence: Number
-    }]
-  }
-}, {
-  clientProvider
 }).last();
 
 setOutput(JSON.stringify(analysis, null, 2));`
@@ -183,7 +140,6 @@ setOutput(JSON.stringify(analysis, null, 2));`
     <book><title>___</title>
     <author>___</author></book>
   </shelf>\`, {
-  clientProvider,
   model: DEFAULT_MODEL
 });
 
@@ -200,9 +156,9 @@ const fictionBooks = await baseStream
 setOutput(JSON.stringify(fictionBooks, null, 2));`
   },
 
-  colorSchema: {
-    name: 'Rich Data Transformation',
-    description: 'Complex nested schema with validation',
+  colorAttributes: {
+    name: 'Streaming Attributes',
+    description: 'Streamingstructure with RGB color attributes',
     code: `const colorStream = stream(
   'List 3 colors with RGB values:\\n' +
   '<color>\\n' +
@@ -210,7 +166,6 @@ setOutput(JSON.stringify(fictionBooks, null, 2));`
   '  <rgb r="128" g="0" b="128"/>\\n' +
   '</color>',
   {
-    clientProvider,
     model: DEFAULT_MODEL,
     schema: {
       color: [{
@@ -246,7 +201,6 @@ export default function Home() {
       const code = editedCode || tests[selectedTest as keyof typeof tests].code
       const fn = new Function(
         'xmllm',
-        'clientProvider',
         'setOutput',
         'stream',
         'DEFAULT_MODEL',
@@ -260,7 +214,7 @@ export default function Home() {
         })()
       `)
 
-      await fn(xmllm, clientProvider, setOutput, stream, DEFAULT_MODEL)
+      await fn(xmllm, setOutput, stream, DEFAULT_MODEL)
     } catch (error) {
       console.error('Test error:', error)
       setOutput(prev => prev + `\nError: ${error instanceof Error ? error.message : 'Unknown error'}`)

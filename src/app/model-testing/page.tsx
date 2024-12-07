@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ClientProvider, stream } from 'xmllm/client'
-import type { ModelProvider, ModelPreference, HintType } from 'xmllm'
+import { stream } from '@/utils/xmllm'
+import type { ModelPreference, HintType } from 'xmllm'
 import CodeMirror from '@uiw/react-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
@@ -13,8 +13,6 @@ import { ModelConfig, MODEL_CONFIGS } from '@/config/model-testing/models'
 import { TestCase, TEST_CASES } from '@/config/model-testing/test-cases'
 import type { TestResult } from './types'
 import { getPriceCategory } from './utils/price'
-
-const clientProvider = new ClientProvider('http://localhost:3124/api/stream')
 
 // Define the default enabled models
 const DEFAULT_ENABLED_MODELS = ['claude3-haiku', 'sonar-small', 'gpt-4o-mini']
@@ -29,6 +27,7 @@ export default function ModelTesting() {
   const [useHints, setUseHints] = useState(false)
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set())
   const [connectionError, setConnectionError] = useState<string | null>(null)
+  const [useSudoPrompt, setUseSudoPrompt] = useState(false)
 
   const { 
     savedResults, 
@@ -84,6 +83,7 @@ export default function ModelTesting() {
         schema,
         model: modelConfig.config as ModelPreference,
         hints: useHints ? eval(`(${testCase.hints})` as any) as HintType : undefined,
+        sudoPrompt: useSudoPrompt,
         onChunk: (chunk: string) => {
           console.log('chunk:::', chunk)
           rawXml += chunk
@@ -96,7 +96,7 @@ export default function ModelTesting() {
       }
 
       console.log('Creating stream with config:', streamConfig)
-      const theStream = stream(streamConfig, { clientProvider })
+      const theStream = stream(streamConfig)
 
       const result = await theStream.last()
       console.log('Stream completed with result:', result)
@@ -215,9 +215,53 @@ export default function ModelTesting() {
           </div>
         )}
 
-        <div className="grid grid-cols-[320px,1fr] gap-8">
+        <div className="grid grid-cols-[360px,1fr] gap-8">
           <div className="space-y-4">
             <div className="sticky top-8">
+              <div className="space-y-6 mb-4 p-4 border border-border rounded-lg">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setUseHints(prev => !prev)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                        ${useHints ? 'bg-primary' : 'bg-muted'}
+                      `}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                          ${useHints ? 'translate-x-6' : 'translate-x-1'}
+                        `}
+                      />
+                    </button>
+                    <span className="text-sm font-medium">Use Hints</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground pl-[52px]">
+                    Provides example data to guide the LLM beyond just schema structure
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setUseSudoPrompt(prev => !prev)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                        ${useSudoPrompt ? 'bg-primary' : 'bg-muted'}
+                      `}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                          ${useSudoPrompt ? 'translate-x-6' : 'translate-x-1'}
+                        `}
+                      />
+                    </button>
+                    <span className="text-sm font-medium">Sudo Prompting</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground pl-[52px]">
+                    Adds forceful dialog to make the LLM follow instructions more strictly
+                  </div>
+                </div>
+              </div>
+
               <button
                 onClick={runAllTests}
                 disabled={isRunning || activeModels.length === 0}
@@ -226,6 +270,7 @@ export default function ModelTesting() {
               >
                 {isRunning ? 'Running Tests...' : 'Run Tests'}
               </button>
+
               <ModelSelector
                 models={MODEL_CONFIGS}
                 activeModels={activeModels}
@@ -241,29 +286,6 @@ export default function ModelTesting() {
                   savedResults.map(r => `${r.modelId}-${r.testId}`)
                 )}
               />
-
-              <div className="mt-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setUseHints(prev => !prev)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-                      ${useHints ? 'bg-primary' : 'bg-muted'}
-                    `}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                        ${useHints ? 'translate-x-6' : 'translate-x-1'}
-                      `}
-                    />
-                  </button>
-                  <label className="text-sm font-medium">
-                    Use Hints
-                    <span className="ml-2 text-xs text-muted-foreground block">
-                      {useHints ? 'Providing example values' : 'Using schema only'}
-                    </span>
-                  </label>
-                </div>
-              </div>
             </div>
           </div>
 

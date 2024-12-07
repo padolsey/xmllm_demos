@@ -18,8 +18,10 @@ export function useTheme() {
 
 export default function ThemeProvider({
   children,
+  showToggle = true,
 }: {
   children: React.ReactNode
+  showToggle?: boolean
 }) {
   const [theme, setTheme] = useState<Theme>('light')
 
@@ -57,15 +59,17 @@ export default function ThemeProvider({
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors"
-          aria-label="Toggle theme"
-        >
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
-      </div>
+      {showToggle && (
+        <div className="fixed top-4 right-4 z-50">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+        </div>
+      )}
       {children}
     </ThemeContext.Provider>
   )

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import ThemeProvider from "./theme-provider";
 import "./globals.css";
+import { headers } from 'next/headers'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,33 +20,24 @@ export const metadata: Metadata = {
   description: "Test interface for XMLLM client",
 };
 
-// This script now includes a blocking period to prevent flash
-const themeScript = `
-  (function() {
-    document.documentElement.style.visibility = 'hidden';
-    let theme = localStorage.getItem('theme');
-    if (!theme) {
-      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.style.visibility = '';
-  })();
-`;
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
+  const headersList = await headers()
+  const isColorsPage = headersList.get('x-is-colors-page') === '1'
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        {isColorsPage ? (
+          children
+        ) : (
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        )}
       </body>
     </html>
   );
