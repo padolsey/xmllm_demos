@@ -13,7 +13,6 @@ configure({
       'openai:fast',
       'claude:fast',
     ],
-    max_tokens: 2000, 
   },
   clientProvider
 })
@@ -24,8 +23,8 @@ export { stream, simple, xmllm }
 // Export common types
 export type { 
   ModelPreference,
-  StreamConfig,
-  Schema,
+  StreamOptions,
+  SchemaType,
   HintType
 } from 'xmllm/client'
 

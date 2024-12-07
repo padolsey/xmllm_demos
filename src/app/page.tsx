@@ -93,7 +93,7 @@ export default function Home() {
                   key={demo.href}
                   href={demo.href}
                   className={`p-4 rounded-lg border transition-colors duration-200
-                    ${demo.featured 
+                    ${demo.primary 
                       ? 'border-primary bg-primary/10 hover:bg-primary/20' 
                       : 'border-primary/50 bg-primary/5 hover:bg-primary/10'}`}
                 >

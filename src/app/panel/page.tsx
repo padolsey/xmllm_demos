@@ -40,6 +40,7 @@ interface PanelConfig {
 }
 
 const DEFAULT_CONFIG: PanelConfig = {
+  model: 'all',
   systemPrompt: '',
   messages: [{ role: 'user', content: '' }],
   temperature: 0.7,

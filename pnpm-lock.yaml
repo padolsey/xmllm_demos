@@ -12,8 +12,8 @@ importers:
         specifier: ^11.13.1
         version: 11.13.1(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
       xmllm:
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: ^0.1.51
+        version: 0.1.51
     devDependencies:
       '@codemirror/lang-javascript':
         specifier: ^6.2.2
@@ -854,10 +854,6 @@ packages:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
     engines: {node: '>= 0.8'}
 
-  p-limit@6.1.0:
-    resolution: {integrity: sha512-H0jc0q1vOzlEk0TqAKXKZxdl7kX3OFUzCnNVUnq5Pc3DGo0kpeaMuPqxQn235HibwBEb0/pm9dgKTjXy66fBkg==}
-    engines: {node: '>=18'}
-
   p-queue@8.0.1:
     resolution: {integrity: sha512-NXzu9aQJTAzbBqOt2hwsR63ea7yvxJc0PwN/zobNAudYfb1B7R08SzB4TsLeSbUCuG467NhnoT0oO6w1qRO+BA==}
     engines: {node: '>=18'}
@@ -1176,18 +1172,14 @@ packages:
     resolution: {integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==}
     engines: {node: '>=12'}
 
-  xmllm@0.1.4:
-    resolution: {integrity: sha512-71ImbbF0lRnphxVGzcv0Thl3ptFfGqqB0T798ffZm6C0HXp2bV/Ohxb4Ii2y8epbhrk3B9kyYbscojjJYDe/MA==}
+  xmllm@0.1.51:
+    resolution: {integrity: sha512-1sSMfkU6QyUipRVGuigvPT57fnm67bcNb8icKUQXh8wn+nn16P91zW0TQJlpZO/wqJUjN0UJh87eVZ/cl03B4g==}
     hasBin: true
 
   yaml@2.6.1:
     resolution: {integrity: sha512-7r0XPzioN/Q9kXBro/XPnA6kznR73DHq+GXh5ON7ZozRO6aMjbmiBuKste2wslTFkC5d1dw0GooOCepZXJ2SAg==}
     engines: {node: '>= 14'}
     hasBin: true
-
-  yocto-queue@1.1.1:
-    resolution: {integrity: sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==}
-    engines: {node: '>=12.20'}
 
 snapshots:
 
@@ -1984,10 +1976,6 @@ snapshots:
     dependencies:
       ee-first: 1.1.1
 
-  p-limit@6.1.0:
-    dependencies:
-      yocto-queue: 1.1.1
-
   p-queue@8.0.1:
     dependencies:
       eventemitter3: 5.0.1
@@ -2333,7 +2321,7 @@ snapshots:
       string-width: 5.1.2
       strip-ansi: 7.1.0
 
-  xmllm@0.1.4:
+  xmllm@0.1.51:
     dependencies:
       '@types/node': 22.10.1
       cors: 2.8.5
@@ -2343,12 +2331,9 @@ snapshots:
       express: 4.21.2
       htmlparser2: 9.1.0
       lru-cache: 11.0.2
-      p-limit: 6.1.0
       p-queue: 8.0.1
       streamops: 0.1.20
     transitivePeerDependencies:
       - supports-color
 
   yaml@2.6.1: {}
-
-  yocto-queue@1.1.1: {}

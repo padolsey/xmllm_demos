@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "framer-motion": "^11.13.1",
-    "xmllm": "^0.1.4"
+    "xmllm": "^0.1.51"
   }
 }
