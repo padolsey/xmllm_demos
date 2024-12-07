@@ -1,7 +1,10 @@
 import { stream, simple, xmllm, configure, ClientProvider } from 'xmllm/client'
 
 // Create a client provider instance
-export const clientProvider = new ClientProvider('http://localhost:3124/api/stream')
+export const clientProvider = new ClientProvider(
+  // 'http://localhost:3124/api/stream',
+  'https://xmllm-proxy.j11y.io/api/stream'
+)
 
 // Configure global defaults
 configure({
