@@ -224,10 +224,10 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen p-4 md:p-8 bg-background text-foreground">
+    <div className="bg-background text-foreground">
       <div className="max-w-[1800px] mx-auto">
         <header className="border-b border-border pb-4 mb-8">
-          <h1 className="text-3xl font-bold">XMLLM Client Tests</h1>
+          <h1 className="text-3xl font-bold">Scenario Playground</h1>
           <p className="text-muted-foreground mt-2">
             Select a test scenario and view the results
           </p>
@@ -349,6 +349,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

@@ -316,7 +316,7 @@ export default function Panel() {
   }
 
   return (
-    <main className="min-h-screen p-4 md:p-8 bg-background text-foreground">
+    <div className="bg-background text-foreground">
       <div className="max-w-[1800px] mx-auto">
         {/* Header with subtle gradient */}
         <header className="border-b border-border/40 pb-4 mb-8 bg-gradient-to-r from-background to-card/20">
@@ -670,6 +670,6 @@ export default function Panel() {
         {/* Add padding at bottom to account for fixed button */}
         <div className="h-20" />
       </div>
-    </main>
+    </div>
   )
 } 

@@ -45,7 +45,7 @@ export default function SpeciesGeneratorPage() {
   }, [isGenerating])
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="bg-background">
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Header and Generate Button */}
         <div className="flex justify-between items-center">

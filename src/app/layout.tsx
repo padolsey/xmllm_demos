@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Toaster } from 'sonner'
 import ThemeProvider from "./theme-provider";
+import { Navbar } from "@/components/Navbar";
+import { ErrorProvider } from "@/contexts/ErrorContext";
 import "./globals.css";
 import { headers } from 'next/headers'
 
@@ -16,7 +19,10 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "XMLLM Client Tests",
+  title: {
+    default: 'xmllm playground & demos',
+    template: '%s - xmllm'
+  },
   description: "Test interface for XMLLM client",
 };
 
@@ -30,14 +36,18 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {isColorsPage ? (
-          children
-        ) : (
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
+        <ErrorProvider>
           <ThemeProvider>
-            {children}
+            <Navbar />
+            <main className="flex-1 p-8">
+              <div className="max-w-[1800px] mx-auto">
+                {children}
+              </div>
+            </main>
+            <Toaster position="top-center" />
           </ThemeProvider>
-        )}
+        </ErrorProvider>
       </body>
     </html>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { stream } from '@/utils/xmllm'
+import { useError } from '@/contexts/ErrorContext'
 import { ColorThemeCard } from '@/components/ColorThemeCard'
 import { colorThemeSchema } from '@/config/schemas/colorTheme'
 import type { ColorTheme } from '@/components/ColorThemeCard'
@@ -20,6 +21,7 @@ Each theme should have:
 Create themes that tell a story and evoke specific emotions or environments.`
 
 export default function ColorsPage() {
+  const { showError } = useError()
   const [isGenerating, setIsGenerating] = useState(false)
   const [themes, setThemes] = useState<ColorTheme[]>([])
   const [loadingProgress, setLoadingProgress] = useState(0)
@@ -54,6 +56,7 @@ export default function ColorsPage() {
       }
     } catch (error) {
       console.error('Generation error:', error)
+      showError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
       clearInterval(loadingInterval)
       setIsGenerating(false)
@@ -62,7 +65,7 @@ export default function ColorsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100 p-8 font-mono">
+    <div className="bg-zinc-100 font-mono">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16 relative">

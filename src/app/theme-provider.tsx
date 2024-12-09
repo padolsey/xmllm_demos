@@ -59,17 +59,6 @@ export default function ThemeProvider({
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {showToggle && (
-        <div className="fixed top-4 right-4 z-50">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors"
-            aria-label="Toggle theme"
-          >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
-        </div>
-      )}
       {children}
     </ThemeContext.Provider>
   )

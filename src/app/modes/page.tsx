@@ -266,7 +266,7 @@ export default function ModesDemo() {
   const occupiedSlices = calculateOccupiedSlices();
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="bg-background">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Header */}
         <header className="text-center space-y-4">
