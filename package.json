@@ -23,13 +23,16 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.1.0",
     "@tailwindcss/typography": "^0.5.15",
     "@types/react-syntax-highlighter": "^15.5.13",
     "framer-motion": "^11.13.1",
+    "lucide-react": "^0.468.0",
+    "p-queue": "^8.0.1",
     "react-markdown": "^9.0.1",
     "react-syntax-highlighter": "^15.6.1",
     "sonner": "^1.7.1",
-    "xmllm": "^0.1.52",
+    "xmllm": "^0.1.6",
     "zustand": "^5.0.2"
   }
 }

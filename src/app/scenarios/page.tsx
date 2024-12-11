@@ -4,10 +4,10 @@ import { useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { xmllm, stream } from '@/utils/xmllm'
+import { xmllm, stream, simple } from '@/utils/xmllm'
 import { useTheme } from '../theme-provider'
 
-const DEFAULT_MODEL = 'togetherai:fast'
+const DEFAULT_MODEL = ['togetherai:fast', 'openrouter:mistralai/ministral-3b']
 
 // Just store the example code strings
 const tests = {
@@ -203,6 +203,7 @@ export default function Home() {
         'xmllm',
         'setOutput',
         'stream',
+        'simple',
         'DEFAULT_MODEL',
         `return (async () => {
           try {
@@ -214,7 +215,7 @@ export default function Home() {
         })()
       `)
 
-      await fn(xmllm, setOutput, stream, DEFAULT_MODEL)
+      await fn(xmllm, setOutput, stream, simple, DEFAULT_MODEL)
     } catch (error) {
       console.error('Test error:', error)
       setOutput(prev => prev + `\nError: ${error instanceof Error ? error.message : 'Unknown error'}`)

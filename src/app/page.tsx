@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Markdown } from '@/components/Markdown'
 import { loadMarkdown } from '@/utils/loadMarkdown'
+import { QuickFlagGenerator } from '@/components/QuickFlagGenerator'
 
 // Main demos first, ordered by importance
 const mainDemos = [
@@ -61,13 +62,24 @@ export default async function Home() {
   const readmeContent = await loadMarkdown('readme.md')
 
   return (
-    <main className="min-h-screen bg-background p-8">
+    <main className="min-h-screen bg-background p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Description */}
-        <div className="mb-12 text-center">
+        <div className="mb-12">
           <p className="text-xl text-muted-foreground">
             A JS utility for getting structured data from LLMs using XML and HTML parsing: it is forgiving of LLM's mistakes, fully streaming, and works alongside the best nature of LLMs: creating diverse free-prose. It uses a high-compliance prompting techniques with exemplar XML scaffolds, hints and flexible CSS selection to ensure data is located and reflected back to you.
           </p>
+        </div>
+
+        {/* Flag Generator Demo */}
+        <div className="mb-16 bg-muted/30 border rounded-xl p-4 sm:p-8">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary/60" />
+              Try It: See an LLM live-streaming into a UI
+            </h2>
+            <QuickFlagGenerator />
+          </div>
         </div>
 
         {/* Main Demos */}

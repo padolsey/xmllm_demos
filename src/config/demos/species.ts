@@ -81,7 +81,6 @@ export const speciesDemo: DemoConfig = {
     }
   }),
   simulateStream: async ({ chunkSize, speed, onChunk, onResult, signal }) => {
-    console.log('Starting species simulation')
     
     const stream = xmllm(({ parse, select, map }: PipelineHelpers) => [
       async function*() {
@@ -95,7 +94,6 @@ export const speciesDemo: DemoConfig = {
       parse(),
       select('species'),
       map((data: any) => {
-        console.log('Raw species data:', data)
         // Transform for simulated mode
         return {
           name: data?.name?.[0]?.$text,

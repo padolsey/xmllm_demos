@@ -6,7 +6,7 @@ import { useTheme } from '../theme-provider'
 
 // Available models configuration
 const MODEL_OPTIONS = [
-  { id: 'all', name: 'All Models' },
+  { id: 'openrouter:mistralai/ministral-3b', name: 'Mistral 3B (OpenRouter)' },
   { id: 'claude:superfast', name: 'Claude Haiku (Super Fast)' },
   { id: 'claude:fast', name: 'Claude Haiku (Fast)' },
   { id: 'claude:good', name: 'Claude Sonnet (Good)' },
@@ -40,7 +40,7 @@ interface PanelConfig {
 }
 
 const DEFAULT_CONFIG: PanelConfig = {
-  model: 'all',
+  model: 'openrouter:mistralai/ministral-3b',
   systemPrompt: '',
   messages: [{ role: 'user', content: '' }],
   temperature: 0.7,
@@ -61,7 +61,8 @@ const ALL_MODELS = [
   'togetherai:good', 
   'claude:fast', 
   'openai:fast', 
-  'togetherai:fast'
+  'togetherai:fast',
+  'openrouter:mistralai/ministral-3b'
 ]
 
 // Fix type error for SCHEMA_TEMPLATES indexing
@@ -113,7 +114,7 @@ export default function Panel() {
 
   // Load config from localStorage on mount
   useEffect(() => {
-    const savedConfig = localStorage.getItem('panelConfig')
+    const savedConfig = localStorage.getItem('_panelConfig')
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig)
@@ -135,7 +136,7 @@ export default function Panel() {
 
   // Save config to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('panelConfig', JSON.stringify(config))
+    localStorage.setItem('_panelConfig', JSON.stringify(config))
   }, [config])
 
   function updateMessage(index: number, content: string) {
@@ -262,44 +263,39 @@ export default function Panel() {
         setRawOutput(prev => prev + chunk);
       }
 
-      // Handle 'all' model selection
-      const models = config.model === 'all' ? ALL_MODELS : [config.model];
-      
-      for (const model of models) {
-        if (models.length > 1) {
-          setOutput(prev => prev + `\n\n=== Using ${model} ===\n`);
+      const model = config.model;
+    
+      setOutput(prev => prev + `\n\n=== Using ${model} ===\n`);
+
+      const theStream = stream(
+        {
+          messages: config.messages,
+          system: config.systemPrompt,
+          model: model as ModelPreference,
+          temperature: config.temperature,
+          max_tokens: config.maxTokens,
+          top_p: config.topP,
+          onChunk,
+          presence_penalty: config.presencePenalty,
+          stop: config.stop ? config.stop.split(',').map(s => s.trim()) : undefined,
+          ...(schemaConfig && { schema: schemaConfig.schema })
         }
+      )
 
-        const theStream = stream(
-          {
-            messages: config.messages,
-            system: config.systemPrompt,
-            model: model as ModelPreference,
-            temperature: config.temperature,
-            max_tokens: config.maxTokens,
-            top_p: config.topP,
-            onChunk,
-            presence_penalty: config.presencePenalty,
-            stop: config.stop ? config.stop.split(',').map(s => s.trim()) : undefined,
-            ...(schemaConfig && { schema: schemaConfig.schema })
-          }
-        )
-
-        if (config.schema.enabled) {
-          // For schema-based responses, wait for complete result and format
-          for await (const chunk of theStream) {
-            setOutput(JSON.stringify(chunk, null, 2))
-          }
-        } else {
-          // For raw responses, stream as before
-          let isFirstChunk = true
-          for await (const chunk of theStream.raw()) {
-            if (isFirstChunk) {
-              setOutput(chunk)
-              isFirstChunk = false
-            } else {
-              setOutput(prev => prev + chunk)
-            }
+      if (config.schema.enabled) {
+        // For schema-based responses, wait for complete result and format
+        for await (const chunk of theStream) {
+          setOutput(JSON.stringify(chunk, null, 2))
+        }
+      } else {
+        // For raw responses, stream as before
+        let isFirstChunk = true
+        for await (const chunk of theStream.raw()) {
+          if (isFirstChunk) {
+            setOutput(chunk)
+            isFirstChunk = false
+          } else {
+            setOutput(prev => prev + chunk)
           }
         }
       }

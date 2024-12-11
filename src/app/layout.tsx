@@ -33,15 +33,34 @@ export default async function RootLayout({
 }>) {
   const headersList = await headers()
   const isColorsPage = headersList.get('x-is-colors-page') === '1'
+  const isModelTestingPage = headersList.get('x-is-model-testing') === '1'
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              let stored = localStorage.getItem('theme')
+              let theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+              
+              if (theme === 'dark') {
+                document.documentElement.classList.add('dark')
+              } else {
+                document.documentElement.classList.remove('dark')
+              }
+              
+              document.documentElement.setAttribute('data-theme', theme)
+            `,
+          }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <ErrorProvider>
           <ThemeProvider>
             <Navbar />
-            <main className="flex-1 p-8">
-              <div className="max-w-[1800px] mx-auto">
+            <main className="flex-1 p-4 sm:p-8">
+              <div className={isModelTestingPage ? '' : 'max-w-[1800px] mx-auto'}>
                 {children}
               </div>
             </main>

@@ -12,6 +12,21 @@ export interface TestCase {
 
 export const TEST_CASES: TestCase[] = [
   {
+    id: 'simple-name',
+    name: 'Simple Name Generation',
+    description: 'Generate a single dog name - testing basic string output',
+    schema: `{
+  name: String
+}`,
+    hints: `{
+  name: "A creative dog name like 'Luna' or 'Ziggy'"
+}`,
+    prompt: 'Generate a unique name for a dog',
+    validate: (result) => {
+      return typeof result?.name === 'string' && result.name.length > 0
+    }
+  },
+  {
     id: 'simple-list',
     name: 'Simple List Generation',
     description: 'Generate a basic list of items with attributes',
@@ -156,7 +171,7 @@ export const TEST_CASES: TestCase[] = [
       return profile?.name &&
              typeof profile?.age === 'number' &&
              profile?.occupation?.skills?.skill?.every((s: any) => 
-               s.level.$value <= s.level.$max
+               s?.level?.$value <= s?.level?.$max
              )
     }
   },
@@ -206,17 +221,133 @@ export const TEST_CASES: TestCase[] = [
         }]
       }
     }`,
-    prompt: 'Create a timeline of significant events in a fictional corporate merger.',
+    prompt: 'Create a timeline of significant events in a fictional corporate merger. Severity should be between 1 and 5. Date in form of YYYY-MM-DD and time in form of HH:MM.',
     system: 'You are a business analyst documenting key events. Ensure events are logically connected and timestamps are properly formatted.',
     validate: (result) => {
       const events = result?.timeline?.event
+      console.log('Validating events', events)
       return Array.isArray(events) &&
-             events.every((e: any) => 
-               e.timestamp.$date.match(/^\d{4}-\d{2}-\d{2}$/) &&
-               e.timestamp.$time.match(/^\d{2}:\d{2}$/) &&
-               Array.isArray(e.participants.participant) &&
-               typeof e.impact.severity === 'number'
-             )
+             events.every((e: any) => {
+               console.log('Validating event', e, {
+                timestamp: e?.timestamp,
+                participants: e?.participants,
+                impact: e?.impact
+               })
+               return e?.timestamp?.$date.match(/^\d{4}-\d{2}-\d{2}$/) &&
+                      e?.timestamp?.$time.match(/^\d{2}:\d{2}$/) &&
+                      Array.isArray(e?.participants?.participant) &&
+                      typeof e?.impact?.severity === 'number' && !isNaN(e?.impact?.severity)
+             })
+    }
+  },
+  {
+    id: 'recursive-menu',
+    name: 'Recursive Menu Structure',
+    description: 'Generate a nested menu structure with recursive items - tests handling of self-referential schemas and price hierarchy (items in subcategories must cost at least as much as their parent category base price)',
+    schema: `{
+      menu: {
+        item: Array({
+          name: String,
+          price: Number,
+          subcategories: {
+            category: Array({
+              name: String,
+              items: {
+                item: Array({
+                  name: String,
+                  price: Number
+                })
+              }
+            })
+          }
+        })
+      }
+    }`,
+    hints: `{
+      menu: {
+        item: [{
+          name: "A main category item like 'Pizza' or 'Pasta'",
+          price: "Minimum/base price for this category - all items in subcategories must cost at least this much",
+          subcategories: {
+            category: [{
+              name: "A subcategory like 'Vegetarian' or 'Seafood'",
+              items: {
+                item: [{
+                  name: "Specific item name like 'Margherita' or 'Marinara'",
+                  price: "Must be greater than or equal to the parent category's base price"
+                }]
+              }
+            }]
+          }
+        }]
+      }
+    }`,
+    prompt: 'Create a restaurant menu structure with main categories and their minimum prices, followed by subcategories containing specific items that must cost at least as much as their parent category base price.',
+    validate: (result) => {
+      const items = result?.menu?.item || [];
+
+      return items.length > 0 && items.every((item: any) => 
+        typeof item.price === 'number' &&
+        item.subcategories?.category.length > 0 &&
+        item.subcategories?.category?.every((cat: any) =>
+          cat.items?.item?.every((subItem: any) => 
+            typeof subItem.price === 'number' &&
+            subItem.price >= item.price
+          )
+        )
+      )
+    }
+  },
+  {
+    id: 'conditional-fields',
+    name: 'Conditional Field Requirements',
+    description: 'Generate data where certain fields are required based on other field values',
+    schema: `{
+      transactions: {
+        transaction: Array({
+          type: String,
+          amount: Number,
+          status: String,
+          error_code: String,
+          error_description: String,
+          success_timestamp: String,
+          refund_reason: String,
+          refund_amount: Number
+        })
+      }
+    }`,
+    hints: `{
+      transactions: {
+        transaction: [{
+          type: "One of: 'payment', 'refund', or 'void'",
+          amount: "Transaction amount, e.g. 99.99",
+          status: "One of: 'success', 'failed', 'pending'",
+          error_code: "Required if status is 'failed', e.g. 'INSUFFICIENT_FUNDS'",
+          error_description: "Required if status is 'failed'",
+          success_timestamp: "Required if status is 'success', ISO format",
+          refund_reason: "Required if type is 'refund'",
+          refund_amount: "Required if type is 'refund', must be <= original amount"
+        }]
+      }
+    }`,
+    prompt: 'Generate a list of 5 financial transactions with different types and statuses.',
+    validate: (result) => {
+      const transactions = result?.transactions?.transaction || [];
+      return transactions.length > 1 && transactions.every((t: any) => {
+        if (t.status === 'failed') {
+          return t.error_code && t.error_description
+        }
+        if (t.status === 'success') {
+          return t.success_timestamp && 
+                 /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(t.success_timestamp)
+        }
+        if (t.type === 'refund') {
+          return t.refund_reason && 
+                 typeof t.refund_amount === 'number' && 
+                 t.refund_amount <= t.amount
+        }
+        return true
+      })
     }
   }
 ] 

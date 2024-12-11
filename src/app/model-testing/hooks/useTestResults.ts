@@ -1,6 +1,29 @@
 import { useEffect, useState } from 'react'
 import type { TestResult } from '../types'
 
+// Helper to migrate old format to new format
+const migrateResult = (result: any): TestResult => {
+  if (result.config) {
+    // Remove useSudoPrompt if it exists in the config
+    const { useSudoPrompt, ...config } = result.config
+    return {
+      ...result,
+      config
+    }
+  }
+
+  // Convert old format to new format
+  return {
+    ...result,
+    config: {
+      modelId: result.modelId,
+      useHints: false, // Default values for new fields
+      strategy: 'default',
+      selectedTests: []
+    }
+  }
+}
+
 export function useTestResults() {
   const [savedResults, setSavedResults] = useState<TestResult[]>([])
   const [recentModels, setRecentModels] = useState<string[]>([])
@@ -8,7 +31,11 @@ export function useTestResults() {
   useEffect(() => {
     const saved = localStorage.getItem('modelTestResults')
     if (saved) {
-      setSavedResults(JSON.parse(saved))
+      // Migrate old results to new format
+      const migrated = JSON.parse(saved).map(migrateResult)
+      setSavedResults(migrated)
+      // Update localStorage with migrated format
+      localStorage.setItem('modelTestResults', JSON.stringify(migrated))
     }
     const recent = localStorage.getItem('recentModels')
     if (recent) {

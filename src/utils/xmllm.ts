@@ -8,15 +8,18 @@ export const clientProvider = new ClientProvider(
     'https://xmllm-proxy.j11y.io/api/stream'
 )
 
+const genericApology = "Sorry, tricky to run an LLM demo at scale and keep up with costs."
+
 // Configure global defaults
 configure({
   defaults: {
     temperature: 0.9,
     model: [
-      'togetherai:good',
+      'openrouter:mistralai/ministral-3b',
       'togetherai:fast',
       'openai:fast',
       'claude:fast',
+      'togetherai:good',
     ],
     onChunk: (chunk: string) => {
       if (chunk.startsWith('<error>')) {
@@ -30,14 +33,14 @@ configure({
       }
     },
     errorMessages: {
-      genericFailure: "<error>GENERIC_FAILURE</error>",
-      rateLimitExceeded: "<error>RATE_LIMIT_EXCEEDED</error>",
-      invalidRequest: "<error>INVALID_REQUEST</error>",
-      authenticationFailed: "<error>AUTHENTICATION_FAILED</error>",
-      resourceNotFound: "<error>RESOURCE_NOT_FOUND</error>",
-      serviceUnavailable: "<error>SERVICE_UNAVAILABLE</error>",
-      networkError: "<error>NETWORK_ERROR</error>",
-      unexpectedError: "<error>UNEXPECTED_ERROR</error>"
+      genericFailure: `<error>UNKNOWN_FAILURE: ${genericApology}</error>`,
+      rateLimitExceeded: `<error>RATE_LIMIT_EXCEEDED: ${genericApology}</error>`,
+      invalidRequest: `<error>INVALID_REQUEST: ${genericApology}</error>`,
+      authenticationFailed: `<error>AUTHENTICATION_FAILED: ${genericApology}</error>`,
+      resourceNotFound: `<error>RESOURCE_NOT_FOUND: ${genericApology}</error>`,
+      serviceUnavailable: `<error>SERVICE_UNAVAILABLE: ${genericApology}</error>`,
+      networkError: `<error>NETWORK_ERROR: ${genericApology}</error>`,
+      unexpectedError: `<error>UNEXPECTED_ERROR: ${genericApology}</error>`
     }
   },
   clientProvider
