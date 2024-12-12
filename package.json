@@ -32,7 +32,7 @@
     "react-markdown": "^9.0.1",
     "react-syntax-highlighter": "^15.6.1",
     "sonner": "^1.7.1",
-    "xmllm": "^0.1.6",
+    "xmllm": "^0.1.7",
     "zustand": "^5.0.2"
   }
 }
