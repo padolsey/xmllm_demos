@@ -130,8 +130,8 @@ export default function ComplexTypescript() {
       
       const analysis = await simple(
         prompt,
-        analysisSchema,
         {
+          schema: analysisSchema,
           model: ['togetherai:fast'],
           hints: analysisHints as unknown as HintType
         }

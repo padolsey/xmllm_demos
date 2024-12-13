@@ -52,7 +52,7 @@ export { stream, simple, xmllm }
 // Export common types
 export type { 
   ModelPreference,
-  StreamOptions,
+  ClientStreamingSchemaConfig,
   SchemaType,
   HintType
 } from 'xmllm/client'
