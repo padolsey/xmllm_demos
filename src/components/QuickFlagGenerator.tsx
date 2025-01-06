@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { stream } from '@/utils/xmllm'
+import { Schema } from 'xmllm/client'
 
 const MAX_CHARS = 30
 
@@ -94,7 +95,7 @@ Give the flag name first in your response.`,
             },
             motto: String
           }
-        },
+        } as unknown as Schema,
         temperature: 0.7,
         max_tokens: 500,
         model: ['openrouter:mistralai/ministral-3b', 'togetherai:fast', 'anthropic:fast', 'openai:fast'],

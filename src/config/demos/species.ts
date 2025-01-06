@@ -49,7 +49,7 @@ export const speciesDemo: DemoConfig = {
         colors: {
           color: [{
             $hex: String,
-            $text: String
+            $$text: String
           }]
         },
         path: String,
@@ -73,7 +73,7 @@ export const speciesDemo: DemoConfig = {
     },
     flag: {
       colors: data.flag?.colors?.color?.map((c: any) => ({
-        name: c.$text,
+        name: c.$$text,
         hex: c.$hex
       })) || [],
       path: data.flag?.path,
@@ -96,21 +96,21 @@ export const speciesDemo: DemoConfig = {
       map((data: any) => {
         // Transform for simulated mode
         return {
-          name: data?.name?.[0]?.$text,
-          origin: data?.origin?.[0]?.$text,
-          description: data?.description?.[0]?.$text,
+          name: data?.name?.[0]?.$$text,
+          origin: data?.origin?.[0]?.$$text,
+          description: data?.description?.[0]?.$$text,
           characteristics: {
-            physiology: data?.characteristics?.[0]?.physiology?.[0]?.$text,
-            society: data?.characteristics?.[0]?.society?.[0]?.$text,
-            technology: data?.characteristics?.[0]?.technology?.[0]?.$text
+            physiology: data?.characteristics?.[0]?.physiology?.[0]?.$$text,
+            society: data?.characteristics?.[0]?.society?.[0]?.$$text,
+            technology: data?.characteristics?.[0]?.technology?.[0]?.$$text
           },
           flag: {
             colors: data?.flag?.[0]?.colors?.[0]?.color?.map((c: any) => ({
-              name: c.$text,
+              name: c.$$text,
               hex: c.$attr.hex
             })) || [],
-            path: data?.flag?.[0]?.path?.[0]?.$text,
-            meaning: data?.flag?.[0]?.meaning?.[0]?.$text
+            path: data?.flag?.[0]?.path?.[0]?.$$text,
+            meaning: data?.flag?.[0]?.meaning?.[0]?.$$text
           }
         }
       })

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { stream, configure, types } from '@/utils/xmllm'
-import type { ModelPreference, HintType } from 'xmllm'
+import type { ModelPreference, Hint, BaseStreamConfig } from 'xmllm'
 import { useTheme } from '../theme-provider'
 import { useTestResults } from './hooks/useTestResults'
 import { MODEL_CONFIGS } from '@/config/model-testing/models'
@@ -60,17 +60,19 @@ const MAX_CONCURRENT_TESTS = 3
 const generateStrategyComparisons = (modelId: string) => {
   const strategies = XMLLM_STRATEGIES.map(s => s.id)
   return [
-    // Base strategies without hints
     ...strategies.map(strategy => ({
       modelId,
       useHints: false,
-      strategy
+      strategy,
+      parser: 'xml' as const,
+      idioFormat: 'Classic' as const
     })),
-    // Strategies with hints
     ...strategies.map(strategy => ({
       modelId,
       useHints: true,
-      strategy
+      strategy,
+      parser: 'xml' as const,
+      idioFormat: 'Classic' as const
     }))
   ]
 }
@@ -254,7 +256,7 @@ export default function ModelTesting() {
         cache: !forceRun,
         // cache: true,
         model: modelConfig.config as ModelPreference,
-        hints: testConfig.useHints ? eval(`(${testCase.hints})` as any) as HintType : undefined,
+        hints: testConfig.useHints ? eval(`(${testCase.hints})` as any) as Hint : undefined,
         strategy: testConfig.strategy,
         onChunk: (chunk: string) => {
           rawXml += chunk
@@ -267,7 +269,7 @@ export default function ModelTesting() {
       };
 
       console.log('Creating stream with config:', streamConfig)
-      const theStream = await stream(streamConfig)
+      const theStream = await stream(streamConfig as BaseStreamConfig)
 
       const result = await theStream.last();
       console.log('Stream completed with result:', result)
@@ -290,10 +292,10 @@ export default function ModelTesting() {
 
       setResults(prev => prev.map(r => 
         JSON.stringify(r.config) === JSON.stringify(testConfig) && r.testId === testCase.id
-          ? finalResult
+          ? { ...finalResult, success: finalResult.success === true ? true : false }
           : r
       ))
-      saveResult(finalResult)
+      saveResult(finalResult as TestResult)
       updateRecentModels(testConfig.modelId)
 
     } catch (error) {

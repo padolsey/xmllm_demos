@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { stream, simple } from '@/utils/xmllm'
-import type { XMLElement, HintType } from 'xmllm/client'
+import type { XMLElement, Hints, Schema } from 'xmllm/client'
 
 // Define our domain types
 interface NewsArticle {
@@ -39,7 +39,7 @@ const analysisSchema = {
   top_topic: ["Most frequent topics across all articles"],
   overallSentiment: "General sentiment across all articles",
   metadata: {
-    processedAt: (el: XMLElement) => new Date(el.$text),
+    processedAt: (el: XMLElement) => new Date(el.$$text),
     articleCount: Number
   }
 } as const;
@@ -98,14 +98,17 @@ export default function ComplexTypescript() {
       const headlineStream = stream(
         'List 3 recent tech headlines. Format each as <headline>...</headline>',
         {
-          model: 'togetherai:fast'
+          model: 'togetherai:fast',
+          schema: {
+            headline: Array(String)
+          }
         }
       )
       .select('headline')
       .closedOnly()
       .map((el: XMLElement) => {
         console.debug('Processing element:', el);
-        return el.$text;
+        return el.$$text;
       })
       .debug('Headlines Stream');
 
@@ -131,9 +134,10 @@ export default function ComplexTypescript() {
       const analysis = await simple(
         prompt,
         {
-          schema: analysisSchema,
+          schema: analysisSchema as unknown as Schema,
+          max_tokens: 2000,
           model: ['togetherai:fast'],
-          hints: analysisHints as unknown as HintType
+          hints: analysisHints as unknown as Hints
         }
       ) as AnalysisResult;
 
@@ -153,6 +157,7 @@ export default function ComplexTypescript() {
          Format as <summary>...</summary>`,
         {
           model: 'togetherai:good',
+          max_tokens: 2000,
           onChunk: (chunk: any) => {
             console.debug('Summary Chunk:', chunk);
           },
@@ -169,7 +174,7 @@ export default function ComplexTypescript() {
 
       // Show the final summary
       setOutput(prev => 
-        prev + '\n---\nSummary:\n' + summary.$text + '\n---\n'
+        prev + '\n---\nSummary:\n' + summary.$$text + '\n---\n'
       );
 
       // Show full analysis

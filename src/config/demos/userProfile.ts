@@ -16,17 +16,17 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 // Add this interface to describe the parsed XML structure
 interface ParsedUserProfile {
   name?: [{
-    $text: string;
+    $$text: string;
   }];
   bio?: [{
-    $text: string;
+    $$text: string;
   }];
   details?: [{
     location?: [{
-      $text: string;
+      $$text: string;
     }];
     favorite_color?: [{
-      $text: string;
+      $$text: string;
       $attr: {
         hex: string;
       };
@@ -34,7 +34,7 @@ interface ParsedUserProfile {
   }];
   hobbies?: [{
     hobby?: Array<{
-      $text: string;
+      $$text: string;
       $attr: {
         category: string;
       };
@@ -42,7 +42,7 @@ interface ParsedUserProfile {
   }];
   skills?: [{
     skill?: Array<{
-      $text: string;
+      $$text: string;
       $attr: {
         level: string;
       };
@@ -79,19 +79,19 @@ export const userProfileDemo: DemoConfig = {
         location: String,
         favorite_color: {
           $hex: String,
-          $text: String
+          $$text: String
         }
       },
       hobbies: {
         hobby: [{
           $category: String,
-          $text: String
+          $$text: String
         }]
       },
       skills: {
         skill: [{
           $level: String,
-          $text: String
+          $$text: String
         }]
       }
     }
@@ -107,16 +107,16 @@ export const userProfileDemo: DemoConfig = {
     details: {
       location: data.details?.location,
       favoriteColor: {
-        name: data.details?.favorite_color?.$text,
+        name: data.details?.favorite_color?.$$text,
         hex: data.details?.favorite_color?.$hex
       }
     },
     hobbies: data.hobbies?.hobby?.map((h: any) => ({
-      activity: h.$text,
+      activity: h.$$text,
       category: h.$category
     })) || [],
     skills: data.skills?.skill?.map((s: any) => ({
-      name: s.$text,
+      name: s.$$text,
       level: s.$level
     })) || []
   }),
@@ -137,24 +137,24 @@ export const userProfileDemo: DemoConfig = {
       map((data: ParsedUserProfile) => {
         console.log('Raw data before transform:', data)
         const transformed = userProfileDemo.transform({
-          name: data?.name?.[0]?.$text,
-          bio: data?.bio?.[0]?.$text,
+          name: data?.name?.[0]?.$$text,
+          bio: data?.bio?.[0]?.$$text,
           details: {
-            location: data?.details?.[0]?.location?.[0]?.$text,
+            location: data?.details?.[0]?.location?.[0]?.$$text,
             favorite_color: {
-              $text: data?.details?.[0]?.favorite_color?.[0]?.$text,
+              $$text: data?.details?.[0]?.favorite_color?.[0]?.$$text,
               $hex: data?.details?.[0]?.favorite_color?.[0]?.$attr?.hex
             }
           },
           hobbies: {
             hobby: data?.hobbies?.[0]?.hobby?.map(h => ({
-              $text: h.$text,
+              $$text: h.$$text,
               $category: h.$attr.category
             }))
           },
           skills: {
             skill: data?.skills?.[0]?.skill?.map(s => ({
-              $text: s.$text,
+              $$text: s.$$text,
               $level: s.$attr.level
             }))
           }

@@ -148,8 +148,8 @@ const fictionBooks = await baseStream
   .select('shelf[category="fiction"] > book')
   .closedOnly()
   .map(({title, author}) => ({
-    title: title[0].$text,
-    author: author[0].$text
+    title: title[0].$$text,
+    author: author[0].$$text
   }))
   .all()
 

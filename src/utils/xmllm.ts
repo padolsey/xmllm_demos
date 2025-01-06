@@ -8,7 +8,7 @@ export const clientProvider = new ClientProvider(
     'https://xmllm-proxy.j11y.io/api/stream'
 )
 
-const genericApology = "Sorry, tricky to run an LLM demo at scale and keep up with costs."
+const genericApology = "Sorry, tricky to run an LLM demo at scale and keep up with costs.";
 
 // Configure global defaults
 configure({
@@ -54,8 +54,8 @@ export { stream, simple, xmllm, configure, types }
 export type { 
   ModelPreference,
   ClientStreamingSchemaConfig,
-  SchemaType,
-  HintType
+  Schema,
+  Hint
 } from 'xmllm/client'
 
 // Helper for common streaming patterns

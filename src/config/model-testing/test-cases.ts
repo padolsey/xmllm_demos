@@ -44,7 +44,7 @@ export const TEST_CASES: TestCase[] = [
     item: [{
       $category: String,
       $priority: Number,
-      $text: String
+      $$text: String
     }]
   }
 }`,
@@ -53,7 +53,7 @@ export const TEST_CASES: TestCase[] = [
         item: [{
           $category: "A category like 'work', 'personal', or 'shopping'",
           $priority: "A number from 1-5 indicating importance",
-          $text: "E.g. 'Buy groceries' or 'Finish report'"
+          $$text: "E.g. 'Buy groceries' or 'Finish report'"
         }]
       }
     }`,
@@ -77,7 +77,7 @@ export const TEST_CASES: TestCase[] = [
         if (typeof item.$priority !== 'number') {
           return `Item ${i + 1}: $priority must be a number`
         }
-        if (typeof item.$text !== 'string') {
+        if (typeof item.$$text !== 'string') {
           return `Item ${i + 1}: $text must be a string`
         }
         if (item.$priority < 1 || item.$priority > 5) {
@@ -207,7 +207,7 @@ export const TEST_CASES: TestCase[] = [
     interests: {
       interest: Array({
         $category: String,
-        $text: String
+        $$text: String
       })
     }
   }
@@ -232,7 +232,7 @@ export const TEST_CASES: TestCase[] = [
         interests: {
           interest: [{
             $category: "Category like 'Technology', 'Sports', 'Arts'",
-            $text: "Specific interest like 'Machine Learning' or 'Rock Climbing'"
+            $$text: "Specific interest like 'Machine Learning' or 'Rock Climbing'"
           }]
         }
       }
@@ -301,7 +301,7 @@ export const TEST_CASES: TestCase[] = [
         if (!interest.$category || typeof interest.$category !== 'string') {
           return `Interest ${i + 1}: $category must be a string`
         }
-        if (!interest.$text || typeof interest.$text !== 'string') {
+        if (!interest.$$text || typeof interest.$$text !== 'string') {
           return `Interest ${i + 1}: $text must be a string`
         }
       }

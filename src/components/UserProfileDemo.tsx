@@ -157,21 +157,21 @@ export function UserProfileDemo() {
         select('user_profile'),
         map((profile: any) => {
           return {
-            name: profile?.name?.[0]?.$text,
-            bio: profile?.bio?.[0]?.$text,
+            name: profile?.name?.[0]?.$$text,
+            bio: profile?.bio?.[0]?.$$text,
             details: {
-              location: profile?.details?.[0]?.location?.[0]?.$text,
+              location: profile?.details?.[0]?.location?.[0]?.$$text,
               favoriteColor: {
-                name: profile?.details?.[0]?.favorite_color?.[0]?.$text,
+                name: profile?.details?.[0]?.favorite_color?.[0]?.$$text,
                 hex: profile?.details?.[0]?.favorite_color?.[0]?.$attr?.hex
               }
             },
             hobbies: profile?.hobbies?.[0]?.hobby?.map((h: any) => ({
-              activity: h.$text,
+              activity: h.$$text,
               category: h.$attr.category
             })) || [],
             skills: profile?.skills?.[0]?.skill?.map((s: any) => ({
-              name: s.$text,
+              name: s.$$text,
               level: s.$attr.level
             })) || []
           }
@@ -196,19 +196,19 @@ export function UserProfileDemo() {
             location: String,
             favorite_color: {
               $hex: String,
-              $text: String
+              $$text: String
             }
           },
           hobbies: {
             hobby: [{
               $category: String,
-              $text: String
+              $$text: String
             }]
           },
           skills: {
             skill: [{
               $level: String,
-              $text: String
+              $$text: String
             }]
           }
         }
@@ -227,16 +227,16 @@ export function UserProfileDemo() {
         profile.details = {
           ...(profile.details || {}),
           favoriteColor: {
-            name: profile?.details?.favorite_color?.$text,
+            name: profile?.details?.favorite_color?.$$text,
             hex: profile?.details?.favorite_color?.$hex
           }
         };
         profile.hobbies = profile.hobbies?.hobby?.map((h: any) => ({
-          activity: h.$text,
+          activity: h.$$text,
           category: h.$category
         })) || [];
         profile.skills = profile.skills?.skill?.map((s: any) => ({
-          name: s.$text,
+          name: s.$$text,
           level: s.$level
         })) || [];
         return profile;
