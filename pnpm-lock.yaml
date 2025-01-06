@@ -42,8 +42,8 @@ importers:
         specifier: ^1.7.1
         version: 1.7.1(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
       xmllm:
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       zustand:
         specifier: ^5.0.2
         version: 5.0.2(@types/react@18.3.12)(react@19.0.0-rc-66855b96-20241106)
@@ -1428,8 +1428,8 @@ packages:
     resolution: {integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==}
     engines: {node: '>=12'}
 
-  xmllm@0.2.1:
-    resolution: {integrity: sha512-kGNOnLs37/SdYFHZCsZKZdDMMOSXM28k65z5XPDoj3DfA3xXJB2z4EjaUALfheh/Gr9f5/c67RKrSKYsaP5DJQ==}
+  xmllm@0.2.2:
+    resolution: {integrity: sha512-oCOa2/D+Iw0uavzHoxITgzoV71LEkgUhuS7x9ZgkwuC8GzoQE2Q/pkj/Agc/nNwqC7deOxWOs9RnuHSP/5zTiw==}
     hasBin: true
 
   xtend@4.0.2:
@@ -2952,7 +2952,7 @@ snapshots:
       string-width: 5.1.2
       strip-ansi: 7.1.0
 
-  xmllm@0.2.1:
+  xmllm@0.2.2:
     dependencies:
       '@types/node': 22.10.5
       cors: 2.8.5
