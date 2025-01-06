@@ -3,10 +3,8 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
-  
-  // Add custom headers for page-specific layouts
-  requestHeaders.set('x-is-colors-page', request.nextUrl.pathname === '/colors' ? '1' : '0')
-  requestHeaders.set('x-is-model-testing', request.nextUrl.pathname.startsWith('/model-testing') ? '1' : '0')
+  requestHeaders.set('x-url', request.url)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
 
   return NextResponse.next({
     request: {

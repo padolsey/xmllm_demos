@@ -7,9 +7,9 @@ import { useTheme } from '../theme-provider'
 // Available models configuration
 const MODEL_OPTIONS = [
   { id: 'openrouter:mistralai/ministral-3b', name: 'Mistral 3B (OpenRouter)' },
-  { id: 'claude:superfast', name: 'Claude Haiku (Super Fast)' },
-  { id: 'claude:fast', name: 'Claude Haiku (Fast)' },
-  { id: 'claude:good', name: 'Claude Sonnet (Good)' },
+  { id: 'anthropic:superfast', name: 'Claude Haiku (Super Fast)' },
+  { id: 'anthropic:fast', name: 'Claude Haiku (Fast)' },
+  { id: 'anthropic:good', name: 'Claude Sonnet (Good)' },
   { id: 'openai:superfast', name: 'GPT-4 Mini (Super Fast)' },
   { id: 'openai:fast', name: 'GPT-4 Mini (Fast)' },
   { id: 'openai:good', name: 'GPT-4 (Good)' },
@@ -53,17 +53,6 @@ const DEFAULT_CONFIG: PanelConfig = {
     schema: ''
   }
 }
-
-// Add the ALL_MODELS constant
-const ALL_MODELS = [
-  'claude:good', 
-  'openai:good', 
-  'togetherai:good', 
-  'claude:fast', 
-  'openai:fast', 
-  'togetherai:fast',
-  'openrouter:mistralai/ministral-3b'
-]
 
 // Fix type error for SCHEMA_TEMPLATES indexing
 interface SchemaTemplates {

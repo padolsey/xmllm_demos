@@ -7,7 +7,7 @@ export interface TestCase {
   prompt: string
   system?: string
   expectedStructure?: string
-  validate?: (result: any) => boolean
+  validate?: (result: any) => true | string
 }
 
 export const TEST_CASES: TestCase[] = [
@@ -23,7 +23,16 @@ export const TEST_CASES: TestCase[] = [
 }`,
     prompt: 'Generate a unique name for a dog',
     validate: (result) => {
-      return typeof result?.name === 'string' && result.name.length > 0
+      if (!result?.name) {
+        return 'Missing required "name" field'
+      }
+      if (typeof result.name !== 'string') {
+        return 'Field "name" must be a string'
+      }
+      if (result.name.length === 0) {
+        return 'Field "name" cannot be empty'
+      }
+      return true
     }
   },
   {
@@ -50,12 +59,32 @@ export const TEST_CASES: TestCase[] = [
     }`,
     prompt: 'List 3 tasks with their categories and priority levels (1-5)',
     validate: (result) => {
-      return result?.items?.item?.length === 3 &&
-             result.items.item.every((i: any) => 
-               typeof i.$category === 'string' &&
-               typeof i.$priority === 'number' &&
-               typeof i.$text === 'string'
-             )
+      if (!result?.items?.item) {
+        return 'Missing required path: items.item'
+      }
+      if (!Array.isArray(result.items.item)) {
+        return 'Field "items.item" must be an array'
+      }
+      if (result.items.item.length !== 3) {
+        return `Expected exactly 3 items, got ${result.items.item.length}`
+      }
+
+      for (let i = 0; i < result.items.item.length; i++) {
+        const item = result.items.item[i]
+        if (typeof item.$category !== 'string') {
+          return `Item ${i + 1}: $category must be a string`
+        }
+        if (typeof item.$priority !== 'number') {
+          return `Item ${i + 1}: $priority must be a number`
+        }
+        if (typeof item.$text !== 'string') {
+          return `Item ${i + 1}: $text must be a string`
+        }
+        if (item.$priority < 1 || item.$priority > 5) {
+          return `Item ${i + 1}: $priority must be between 1 and 5`
+        }
+      }
+      return true
     }
   },
   {
@@ -64,20 +93,20 @@ export const TEST_CASES: TestCase[] = [
     description: 'Complex nested structure with multiple data types',
     schema: `{
   analysis: {
-    sentiment: String,
+    sentiment: types.enum('sentiment', ['positive', 'negative', 'neutral', 'mixed']),
     topics: {
       topic: Array(String)
     },
     key_points: {
       point: Array({
         content: String,
-        relevance: Number,
-        category: String
+        relevance: types.number('relevance between 0 and 1'),
+        category: types.enum('category', ['main point', 'supporting detail', 'counterargument'])
       })
     },
     metadata: {
-      confidence: Number,
-      word_count: Number
+      confidence: types.number('confidence between 0 and 1'),
+      word_count: types.number('word count')
     }
   }
 }`,
@@ -104,10 +133,54 @@ export const TEST_CASES: TestCase[] = [
     system: 'You are an expert content analyzer. Extract key points, sentiment, and topics from the given text.',
     validate: (result) => {
       const analysis = result?.analysis
-      return analysis?.sentiment &&
-             Array.isArray(analysis?.topics?.topic) &&
-             Array.isArray(analysis?.key_points?.point) &&
-             typeof analysis?.metadata?.confidence === 'number'
+      if (!analysis) {
+        return 'Missing required "analysis" object'
+      }
+
+      if (!analysis.sentiment) {
+        return 'Missing required field: analysis.sentiment'
+      }
+      if (!['positive', 'negative', 'neutral', 'mixed'].includes(analysis.sentiment)) {
+        return 'Invalid sentiment value. Must be one of: positive, negative, neutral, mixed'
+      }
+
+      if (!analysis.topics?.topic) {
+        return 'Missing required field: analysis.topics.topic'
+      }
+      if (!Array.isArray(analysis.topics.topic)) {
+        return 'Field analysis.topics.topic must be an array'
+      }
+
+      if (!analysis.key_points?.point) {
+        return 'Missing required field: analysis.key_points.point'
+      }
+      if (!Array.isArray(analysis.key_points.point)) {
+        return 'Field analysis.key_points.point must be an array'
+      }
+
+      for (let i = 0; i < analysis.key_points.point.length; i++) {
+        const point = analysis.key_points.point[i]
+        if (!point) {
+          return `Point ${i + 1}: Missing completely`
+        }
+        if (!point.content) {
+          return `Point ${i + 1}: Missing required field 'content'`
+        }
+        if (typeof point.relevance !== 'number' || point.relevance < 0 || point.relevance > 1) {
+          return `Point ${i + 1}: Field 'relevance' must be a number between 0 and 1. Current: ${point.relevance}`
+        }
+        if (!['main point', 'supporting detail', 'counterargument'].includes(point.category)) {
+          return `Point ${i + 1}: Invalid category. Must be one of: main point, supporting detail, counterargument. Current category: ${point.category}`
+        }
+      }
+
+      if (typeof analysis.metadata?.confidence !== 'number' || 
+          analysis.metadata.confidence < 0 || 
+          analysis.metadata.confidence > 1) {
+        return 'Field analysis.metadata.confidence must be a number between 0 and 1'
+      }
+
+      return true
     }
   },
   {
@@ -164,15 +237,76 @@ export const TEST_CASES: TestCase[] = [
         }
       }
     }`,
-    prompt: 'Create a professional profile for a tech industry worker.',
+    prompt: 'Create a professional profile for a tech industry worker. Max possible levels for skills are 5.',
     system: 'Generate realistic profiles with consistent internal logic. Skills should be relevant to the occupation.',
     validate: (result) => {
       const profile = result?.profile
-      return profile?.name &&
-             typeof profile?.age === 'number' &&
-             profile?.occupation?.skills?.skill?.every((s: any) => 
-               s?.level?.$value <= s?.level?.$max
-             )
+      if (!profile) {
+        return 'Missing required "profile" object'
+      }
+
+      if (!profile.name) {
+        return 'Missing required field: profile.name'
+      }
+      if (typeof profile.name !== 'string') {
+        return 'Field profile.name must be a string'
+      }
+
+      if (typeof profile.age !== 'number') {
+        return 'Field profile.age must be a number'
+      }
+
+      // Validate occupation
+      if (!profile.occupation) {
+        return 'Missing required field: profile.occupation'
+      }
+      if (!profile.occupation.title || typeof profile.occupation.title !== 'string') {
+        return 'Field profile.occupation.title must be a string'
+      }
+      if (typeof profile.occupation.years_experience !== 'number') {
+        return 'Field profile.occupation.years_experience must be a number'
+      }
+
+      // Validate skills
+      if (!profile.occupation.skills?.skill || !Array.isArray(profile.occupation.skills.skill)) {
+        return 'Field profile.occupation.skills.skill must be an array'
+      }
+
+      for (let i = 0; i < profile.occupation.skills.skill.length; i++) {
+        const skill = profile.occupation.skills.skill[i]
+        if (!skill.name || typeof skill.name !== 'string') {
+          return `Skill ${i + 1}: name must be a string`
+        }
+        if (!skill.level?.$value || typeof skill.level.$value !== 'number') {
+          return `Skill ${i + 1}: level.$value must be a number`
+        }
+        if (!skill.level?.$max || typeof skill.level.$max !== 'number') {
+          return `Skill ${i + 1}: level.$max must be a number`
+        }
+        if (skill.level.$value > skill.level.$max) {
+          return `Skill ${i + 1}: level.$value (${skill.level.$value}) cannot exceed $max (${skill.level.$max})`
+        }
+        if (skill.level.$max !== 5) {
+          return `Skill ${i + 1}: level.$max must be 5`
+        }
+      }
+
+      // Validate interests
+      if (!profile.interests?.interest || !Array.isArray(profile.interests.interest)) {
+        return 'Field profile.interests.interest must be an array'
+      }
+
+      for (let i = 0; i < profile.interests.interest.length; i++) {
+        const interest = profile.interests.interest[i]
+        if (!interest.$category || typeof interest.$category !== 'string') {
+          return `Interest ${i + 1}: $category must be a string`
+        }
+        if (!interest.$text || typeof interest.$text !== 'string') {
+          return `Interest ${i + 1}: $text must be a string`
+        }
+      }
+
+      return true
     }
   },
   {
@@ -224,20 +358,64 @@ export const TEST_CASES: TestCase[] = [
     prompt: 'Create a timeline of significant events in a fictional corporate merger. Severity should be between 1 and 5. Date in form of YYYY-MM-DD and time in form of HH:MM.',
     system: 'You are a business analyst documenting key events. Ensure events are logically connected and timestamps are properly formatted.',
     validate: (result) => {
-      const events = result?.timeline?.event
-      console.log('Validating events', events)
-      return Array.isArray(events) &&
-             events.every((e: any) => {
-               console.log('Validating event', e, {
-                timestamp: e?.timestamp,
-                participants: e?.participants,
-                impact: e?.impact
-               })
-               return e?.timestamp?.$date.match(/^\d{4}-\d{2}-\d{2}$/) &&
-                      e?.timestamp?.$time.match(/^\d{2}:\d{2}$/) &&
-                      Array.isArray(e?.participants?.participant) &&
-                      typeof e?.impact?.severity === 'number' && !isNaN(e?.impact?.severity)
-             })
+      if (!result?.timeline?.event) {
+        return 'Missing required path: timeline.event'
+      }
+      if (!Array.isArray(result.timeline.event)) {
+        return 'Field timeline.event must be an array'
+      }
+
+      for (let i = 0; i < result.timeline.event.length; i++) {
+        const event = result.timeline.event[i]
+
+        if (!event.title || typeof event.title !== 'string') {
+          return `Event ${i + 1}: title must be a string`
+        }
+
+        // Validate timestamp
+        if (!event.timestamp?.$date) {
+          return `Event ${i + 1}: Missing timestamp.$date`
+        }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(event.timestamp.$date)) {
+          return `Event ${i + 1}: Invalid date format. Must be YYYY-MM-DD`
+        }
+        if (!event.timestamp?.$time) {
+          return `Event ${i + 1}: Missing timestamp.$time`
+        }
+        if (!/^\d{2}:\d{2}$/.test(event.timestamp.$time)) {
+          return `Event ${i + 1}: Invalid time format. Must be HH:MM`
+        }
+
+        if (!event.details || typeof event.details !== 'string') {
+          return `Event ${i + 1}: details must be a string`
+        }
+
+        // Validate participants
+        if (!event.participants?.participant || !Array.isArray(event.participants.participant)) {
+          return `Event ${i + 1}: participants.participant must be an array`
+        }
+        for (let j = 0; j < event.participants.participant.length; j++) {
+          if (typeof event.participants.participant[j] !== 'string') {
+            return `Event ${i + 1}, Participant ${j + 1}: must be a string`
+          }
+        }
+
+        // Validate impact
+        if (typeof event.impact?.severity !== 'number' || event.impact.severity < 1 || event.impact.severity > 5) {
+          return `Event ${i + 1}: impact.severity must be a number between 1 and 5`
+        }
+
+        if (!event.impact?.areas?.area || !Array.isArray(event.impact.areas.area)) {
+          return `Event ${i + 1}: impact.areas.area must be an array`
+        }
+        for (let j = 0; j < event.impact.areas.area.length; j++) {
+          if (typeof event.impact.areas.area[j] !== 'string') {
+            return `Event ${i + 1}, Impact Area ${j + 1}: must be a string`
+          }
+        }
+      }
+
+      return true
     }
   },
   {
@@ -284,18 +462,51 @@ export const TEST_CASES: TestCase[] = [
     }`,
     prompt: 'Create a restaurant menu structure with main categories and their minimum prices, followed by subcategories containing specific items that must cost at least as much as their parent category base price.',
     validate: (result) => {
-      const items = result?.menu?.item || [];
+      const items = result?.menu?.item
+      if (!items) {
+        return 'Missing required path: menu.item'
+      }
+      if (!Array.isArray(items)) {
+        return 'Field menu.item must be an array'
+      }
+      if (items.length === 0) {
+        return 'Menu must contain at least one item'
+      }
 
-      return items.length > 0 && items.every((item: any) => 
-        typeof item.price === 'number' &&
-        item.subcategories?.category.length > 0 &&
-        item.subcategories?.category?.every((cat: any) =>
-          cat.items?.item?.every((subItem: any) => 
-            typeof subItem.price === 'number' &&
-            subItem.price >= item.price
-          )
-        )
-      )
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (typeof item.price !== 'number') {
+          return `Category ${i + 1} (${item.name}): price must be a number`
+        }
+
+        const subcats = item.subcategories?.category
+        if (!Array.isArray(subcats)) {
+          return `Category ${i + 1} (${item.name}): subcategories.category must be an array`
+        }
+        if (subcats.length === 0) {
+          return `Category ${i + 1} (${item.name}): must have at least one subcategory`
+        }
+
+        for (let j = 0; j < subcats.length; j++) {
+          const subcat = subcats[j]
+
+          const subitems = subcat?.items?.item
+          if (!Array.isArray(subitems)) {
+            return `Category ${i + 1}, Subcategory ${j + 1}: items.item must be an array`
+          }
+
+          for (let k = 0; k < subitems.length; k++) {
+            const subitem = subitems[k]
+            if (typeof subitem?.price !== 'number') {
+              return `Category ${i + 1}, Subcategory ${j + 1}, Item ${k + 1}: price must be a number`
+            }
+            if (subitem?.price < item.price) {
+              return `Category ${i + 1}, Subcategory ${j + 1}, Item ${k + 1}: price (${subitem?.price}) must be >= category base price (${item.price})`
+            }
+          }
+        }
+      }
+      return true
     }
   },
   {
@@ -305,14 +516,14 @@ export const TEST_CASES: TestCase[] = [
     schema: `{
       transactions: {
         transaction: Array({
-          type: String,
-          amount: Number,
-          status: String,
-          error_code: String,
-          error_description: String,
-          success_timestamp: String,
-          refund_reason: String,
-          refund_amount: Number
+          type: types.enum('type', ['payment', 'refund', 'void']),
+          amount: types.number('transaction amount'),
+          status: types.enum('status', ['success', 'failed', 'pending']),
+          error_code: types.string('error code'),
+          error_description: types.string('error description'),
+          success_timestamp: types.string('success timestamp ISO format (YYYY-MM-DDTHH:mm:ss)'),
+          refund_reason: types.string('refund reason'),
+          refund_amount: types.number('refund amount')
         })
       }
     }`,
@@ -332,22 +543,169 @@ export const TEST_CASES: TestCase[] = [
     }`,
     prompt: 'Generate a list of 5 financial transactions with different types and statuses.',
     validate: (result) => {
-      const transactions = result?.transactions?.transaction || [];
-      return transactions.length > 1 && transactions.every((t: any) => {
+      const transactions = result?.transactions?.transaction
+      if (!transactions) {
+        return 'Missing required path: transactions.transaction'
+      }
+      if (!Array.isArray(transactions)) {
+        return 'Field transactions.transaction must be an array'
+      }
+      if (transactions.length < 2) {
+        return 'Must have at least 2 transactions'
+      }
+
+      for (let i = 0; i < transactions.length; i++) {
+        const t = transactions[i]
+        
+        // Validate type
+        if (!['payment', 'refund', 'void'].includes(t.type)) {
+          return `Transaction ${i + 1}: Invalid type. Must be one of: payment, refund, void`
+        }
+
+        // Validate amount
+        if (typeof t.amount !== 'number') {
+          return `Transaction ${i + 1}: amount must be a number`
+        }
+
+        // Validate status
+        if (!['success', 'failed', 'pending'].includes(t.status)) {
+          return `Transaction ${i + 1}: Invalid status (${t.status}). Must be one of: success, failed, pending`
+        }
+
+        // Validate failed status requirements
         if (t.status === 'failed') {
-          return t.error_code && t.error_description
+          if (!t.error_code) {
+            return `Transaction ${i + 1}: error_code is required when status is 'failed'`
+          }
+          if (!t.error_description) {
+            return `Transaction ${i + 1}: error_description is required when status is 'failed'`
+          }
         }
+
+        // Validate success status requirements
         if (t.status === 'success') {
-          return t.success_timestamp && 
-                 /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(t.success_timestamp)
+          if (!t.success_timestamp) {
+            return `Transaction ${i + 1}: success_timestamp is required when status is 'success'`
+          }
+          // Dont require seconds. its a bit harsh
+          if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(t.success_timestamp)) {
+            return `Transaction ${i + 1}: Invalid success_timestamp format. Must be ISO format (YYYY-MM-DDTHH:mm:ss...)`
+          }
         }
+
+        // Validate refund type requirements
         if (t.type === 'refund') {
-          return t.refund_reason && 
-                 typeof t.refund_amount === 'number' && 
-                 t.refund_amount <= t.amount
+          if (!t.refund_reason) {
+            return `Transaction ${i + 1}: refund_reason is required for refund transactions`
+          }
+          if (typeof t.refund_amount !== 'number') {
+            return `Transaction ${i + 1}: refund_amount must be a number for refund transactions`
+          }
+          if (t.refund_amount > t.amount) {
+            return `Transaction ${i + 1}: refund_amount (${t.refund_amount}) cannot exceed original amount (${t.amount})`
+          }
         }
-        return true
-      })
+      }
+      return true
+    }
+  },
+  {
+    id: 'blog-posts',
+    name: 'Blog Post Generation',
+    description: 'Generate three short blog posts about apples with different tones (professional, casual, humorous)',
+    schema: `{
+      posts: {
+        post: Array({
+          title: String,
+          tone: types.enum('tone', ['professional', 'casual', 'humorous']),
+          content: types.string('blog post content'),
+          metadata: {
+            word_count: types.number('word count'),
+            reading_time: types.number('estimated reading time in minutes'),
+            keywords: {
+              keyword: Array(String)
+            }
+          }
+        })
+      }
+    }`,
+    hints: `{
+      posts: {
+        post: [{
+          title: "An engaging title related to apples",
+          tone: "One of: 'professional', 'casual', 'humorous'",
+          content: "A 100-200 word blog post about apples",
+          metadata: {
+            word_count: "Number of words in the content",
+            reading_time: "Estimated reading time in minutes (assume 200 words per minute)",
+            keywords: {
+              keyword: ["3-5 relevant keywords for the post"]
+            }
+          }
+        }]
+      }
+    }`,
+    prompt: 'Write three distinct blog posts about apples. Each post should have a different tone: one professional, one casual, and one humorous. Keep each post between 100-200 words.',
+    validate: (result) => {
+      const posts = result?.posts?.post
+      if (!posts) {
+        return 'Missing required path: posts.post'
+      }
+      if (!Array.isArray(posts)) {
+        return 'Field posts.post must be an array'
+      }
+      if (posts.length !== 3) {
+        return `Expected exactly 3 posts, got ${posts.length}`
+      }
+
+      // Track used tones to ensure we have one of each
+      const usedTones = new Set()
+
+      for (let i = 0; i < posts.length; i++) {
+        const post = posts[i]
+        
+        // Check title
+        if (!post.title?.trim()) {
+          return `Post ${i + 1}: Missing or empty title`
+        }
+
+        // Check tone
+        if (!['professional', 'casual', 'humorous'].includes(post.tone)) {
+          return `Post ${i + 1}: Invalid tone. Must be one of: professional, casual, humorous`
+        }
+        if (usedTones.has(post.tone)) {
+          return `Post ${i + 1}: Duplicate tone '${post.tone}'. Each post must have a different tone`
+        }
+        usedTones.add(post.tone)
+
+        // Check content
+        if (!post.content?.trim()) {
+          return `Post ${i + 1}: Missing or empty content`
+        }
+        const wordCount = post.content.split(/\s+/).length
+        if (wordCount < 30 || wordCount > 500) {
+          return `Post ${i + 1}: Content should be between 50-250 words (roughly!!!), got ${wordCount} words`
+        }
+
+        // Check metadata
+        if (!post.metadata) {
+          return `Post ${i + 1}: Missing metadata`
+        }
+        if (typeof post.metadata.word_count !== 'number') {
+          return `Post ${i + 1}: metadata.word_count must be a number`
+        }
+        if (typeof post.metadata.reading_time !== 'number') {
+          return `Post ${i + 1}: metadata.reading_time must be a number`
+        }
+        if (!Array.isArray(post.metadata.keywords?.keyword)) {
+          return `Post ${i + 1}: metadata.keywords.keyword must be an array`
+        }
+        if (post.metadata.keywords.keyword.length < 2 || post.metadata.keywords.keyword.length > 7) {
+          return `Post ${i + 1}: Must have 3-5 keywords ROUGHLy!, got ${post.metadata.keywords.keyword.length}`
+        }
+      }
+
+      return true
     }
   }
 ] 

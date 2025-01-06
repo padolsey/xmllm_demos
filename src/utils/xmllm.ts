@@ -1,4 +1,4 @@
-import { stream, simple, xmllm, configure, ClientProvider } from 'xmllm/client'
+import { stream, simple, xmllm, configure, ClientProvider, types } from 'xmllm/client'
 import { useErrorStore } from '@/stores/errorStore'
 
 // Create a client provider instance
@@ -12,13 +12,14 @@ const genericApology = "Sorry, tricky to run an LLM demo at scale and keep up wi
 
 // Configure global defaults
 configure({
+  // globalParser: 'idio',
   defaults: {
-    temperature: 0.9,
+    temperature: 0.8,
     model: [
       'openrouter:mistralai/ministral-3b',
       'togetherai:fast',
       'openai:fast',
-      'claude:fast',
+      'anthropic:fast',
       'togetherai:good',
     ],
     onChunk: (chunk: string) => {
@@ -47,7 +48,7 @@ configure({
 })
 
 // Re-export configured utilities
-export { stream, simple, xmllm }
+export { stream, simple, xmllm, configure, types }
 
 // Export common types
 export type { 

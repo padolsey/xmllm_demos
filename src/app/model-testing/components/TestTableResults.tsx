@@ -10,6 +10,7 @@ import { getPriceCategory } from '../utils/price'
 import type { TestResult, ModelTestConfig } from '../types'
 import type { ModelConfig } from '@/config/model-testing/models'
 import { ConfigHeader } from './ConfigHeader'
+import { CopyButton } from './CopyButton'
 
 interface TestTableResultsProps {
   activeConfigs: ModelTestConfig[]
@@ -18,7 +19,7 @@ interface TestTableResultsProps {
   selectedTest: string | null
   expandedBoxes: Set<string>
   theme: string
-  onRunConfig: (modelId: string, config: ModelTestConfig) => void
+  onRunConfig: (modelId: string, config: ModelTestConfig, testId?: string) => void
   onToggleExpand: (boxId: string) => void
   onSelectTest: (testId: string | null) => void
 }
@@ -90,7 +91,7 @@ export function TestTableResults({
                         result ? 
                           result.success === 'ongoing'
                             ? 'bg-primary/5 border-l-4 border-l-primary'
-                            : result.success
+                            : result.success === true
                               ? 'bg-emerald-500/5 border-l-4 border-l-emerald-500'
                               : 'bg-red-500/5 border-l-4 border-l-red-500'
                         : 'bg-card/50'
@@ -98,25 +99,60 @@ export function TestTableResults({
                   >
                     {result ? (
                       <div className="space-y-2">
-                        <div className={`text-sm font-medium ${
-                          result.success === 'ongoing' 
-                            ? 'text-primary'
-                            : result.success 
-                              ? 'text-emerald-500' 
-                              : 'text-red-500'
-                        }`}>
-                          {result.success === 'ongoing' 
-                            ? 'In Progress' 
-                            : result.success 
-                              ? 'Success' 
-                              : 'Failed'}
-                          <span className="text-muted-foreground ml-2">
-                            ({((result.timing.end - result.timing.start) / 1000).toFixed(1)}s)
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className={`text-sm font-medium ${
+                            result.success === 'ongoing' 
+                              ? 'text-primary'
+                              : result.success === true
+                                ? 'text-emerald-500' 
+                                : 'text-red-500'
+                          }`}>
+                            {result.success === 'ongoing' 
+                              ? 'In Progress' 
+                              : result.success === true
+                                ? 'Success' 
+                                : 'Failed'}
+                            <span className="text-muted-foreground ml-2">
+                              ({((result.timing.end - result.timing.start) / 1000).toFixed(1)}s)
+                            </span>
+                          </div>
+                          
+                          <button
+                            onClick={() => onRunConfig(config.modelId, config, testCase.id)}
+                            disabled={runningTests.has(`${JSON.stringify(config)}-${testCase.id}`)}
+                            className="p-1.5 text-xs bg-primary/10 hover:bg-primary/20 
+                                      text-primary rounded-md flex items-center gap-1
+                                      disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <RotateCw className={`w-3 h-3 ${
+                              runningTests.has(`${JSON.stringify(config)}-${testCase.id}`) 
+                                ? 'animate-spin' 
+                                : ''
+                            }`} />
+                            <span>Run</span>
+                          </button>
                         </div>
 
+                        {typeof result.success === 'string' && result.success !== 'ongoing' && (
+                          <div className="mt-1 text-xs font-normal bg-red-500/10 text-red-500 p-2 rounded">
+                            Validation Error: {result.success}
+                          </div>
+                        )}
+
                         <div className="text-xs">
-                          <div className="font-medium mb-1">Raw XML:</div>
+                          <div className="font-medium mb-1 flex items-center justify-between">
+                            <span>Raw LLM Output:</span>
+                            <div className="flex items-center gap-2">
+                              <CopyButton text={result.rawXml || ''} />
+                              <button
+                                onClick={() => onToggleExpand(`${JSON.stringify(result.config)}-${result.testId}-xml`)}
+                                className="p-1.5 text-xs bg-primary/10 hover:bg-primary/20 
+                                          text-primary rounded shadow-sm flex items-center gap-1"
+                              >
+                                {expandedBoxes.has(`${JSON.stringify(result.config)}-${result.testId}-xml`) ? 'Collapse' : 'Expand'}
+                              </button>
+                            </div>
+                          </div>
                           <div className="relative">
                             <pre className={`bg-muted p-2 rounded overflow-auto transition-[max-height] duration-200 
                               max-w-full break-all whitespace-pre-wrap ${
@@ -126,35 +162,30 @@ export function TestTableResults({
                             }`}>
                               {result.rawXml || 'No XML generated'}
                             </pre>
-                            <button
-                              onClick={() => onToggleExpand(`${JSON.stringify(result.config)}-${result.testId}-xml`)}
-                              className="absolute bottom-2 right-2 px-1.5 py-0.5 text-[10px] 
-                                        bg-primary/20 hover:bg-primary/30 rounded 
-                                        text-primary font-medium shadow-sm"
-                            >
-                              {expandedBoxes.has(`${JSON.stringify(result.config)}-${result.testId}-xml`) ? 'Collapse' : 'Expand'}
-                            </button>
                           </div>
-                        </div>
 
-                        <div className="text-xs">
-                          <div className="font-medium mb-1">Parsed JSON:</div>
+                          <div className="font-medium mt-4 mb-1 flex items-center justify-between">
+                            <span>Parsed JSON:</span>
+                            <div className="flex items-center gap-2">
+                              <CopyButton text={JSON.stringify(result.parsedJson, null, 2) || ''} />
+                              <button
+                                onClick={() => onToggleExpand(`${JSON.stringify(result.config)}-${result.testId}-json`)}
+                                className="p-1.5 text-xs bg-primary/10 hover:bg-primary/20 
+                                          text-primary rounded shadow-sm flex items-center gap-1"
+                              >
+                                {expandedBoxes.has(`${JSON.stringify(result.config)}-${result.testId}-json`) ? 'Collapse' : 'Expand'}
+                              </button>
+                            </div>
+                          </div>
                           <div className="relative">
-                            <pre className={`bg-muted p-2 rounded overflow-auto transition-[max-height] duration-200 ${
+                            <pre className={`bg-muted p-2 rounded overflow-auto transition-[max-height] duration-200 
+                              max-w-full break-all whitespace-pre-wrap ${
                               expandedBoxes.has(`${JSON.stringify(result.config)}-${result.testId}-json`)
                                 ? 'max-h-[600px]'
                                 : 'max-h-[100px]'
                             }`}>
                               {JSON.stringify(result.parsedJson, null, 2) || 'No JSON parsed'}
                             </pre>
-                            <button
-                              onClick={() => onToggleExpand(`${JSON.stringify(result.config)}-${result.testId}-json`)}
-                              className="absolute bottom-2 right-2 px-1.5 py-0.5 text-[10px] 
-                                        bg-primary/20 hover:bg-primary/30 rounded 
-                                        text-primary font-medium shadow-sm"
-                            >
-                              {expandedBoxes.has(`${JSON.stringify(result.config)}-${result.testId}-json`) ? 'Collapse' : 'Expand'}
-                            </button>
                           </div>
                         </div>
 
@@ -165,30 +196,22 @@ export function TestTableResults({
                         )}
                       </div>
                     ) : (
-                      <div className="text-sm text-muted-foreground">
-                        {runningTests.has(`${JSON.stringify(config)}-${testCase.id}`) ? (
-                          <div className="flex items-center gap-2">
-                            <svg className="animate-spin h-4 w-4 text-primary" viewBox="0 0 24 24">
-                              <circle 
-                                className="opacity-25" 
-                                cx="12" 
-                                cy="12" 
-                                r="10" 
-                                stroke="currentColor" 
-                                strokeWidth="4"
-                                fill="none"
-                              />
-                              <path 
-                                className="opacity-75" 
-                                fill="currentColor" 
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
-                            <span>Running...</span>
-                          </div>
-                        ) : (
-                          'Not tested'
-                        )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">No results</span>
+                        <button
+                          onClick={() => onRunConfig(config.modelId, config, testCase.id)}
+                          disabled={runningTests.has(`${JSON.stringify(config)}-${testCase.id}`)}
+                          className="p-1.5 text-xs bg-primary/10 hover:bg-primary/20 
+                                    text-primary rounded-md flex items-center gap-1
+                                    disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <RotateCw className={`w-3 h-3 ${
+                            runningTests.has(`${JSON.stringify(config)}-${testCase.id}`) 
+                              ? 'animate-spin' 
+                              : ''
+                          }`} />
+                          <span>Run</span>
+                        </button>
                       </div>
                     )}
                   </td>

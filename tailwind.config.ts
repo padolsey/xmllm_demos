@@ -95,6 +95,24 @@ export default {
           900: '#0f172a',
         }
       },
+      animation: {
+        scan: 'scan 2s linear infinite',
+        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'neural-pulse': 'neural-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        scan: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' }
+        },
+        'neural-pulse': {
+          '0%, 100%': { opacity: '0.2' },
+          '50%': { opacity: '0.4' }
+        }
+      },
+      fontFamily: {
+        mono: ['JetBrains Mono', 'monospace'], // or your preferred mono font
+      },
     },
   },
   plugins: [

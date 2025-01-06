@@ -54,7 +54,7 @@ export default function FluidDemo() {
       if (useRealLLM) {
 
         const theStream = stream({
-          model: ['togetherai:fast', 'claude:fast', 'openai:fast'],
+          model: ['togetherai:fast', 'anthropic:fast', 'openai:fast'],
           prompt: currentDemo.prompt,
           schema: currentDemo.schema,
           temperature: currentDemo.temperature,

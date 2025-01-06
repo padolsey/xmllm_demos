@@ -4,6 +4,7 @@ import { XMLLM_STRATEGIES } from '../constants'
 import { getPriceCategory } from '../utils/price'
 import type { ModelTestConfig } from '../types'
 import type { ModelConfig } from '@/config/model-testing/models'
+import { IDIO_FORMATS } from '../types'
 
 interface ConfigHeaderProps {
   config: ModelTestConfig
@@ -16,7 +17,10 @@ export function ConfigHeader({ config, onRunConfig }: ConfigHeaderProps) {
       model?.name || config.modelId,
       config.useHints ? 'Hints' : null,
       config.strategy !== 'default' ? 
-        XMLLM_STRATEGIES.find(v => v.id === config.strategy)?.name : null
+        XMLLM_STRATEGIES.find(v => v.id === config.strategy)?.name : null,
+      config.parser === 'idio' ? 
+        `Idio (${IDIO_FORMATS.find(f => f.name === config.idioFormat)?.name})` : 
+        'XML'
     ].filter(Boolean)
     
     return parts.join(' + ')
@@ -58,6 +62,15 @@ export function ConfigHeader({ config, onRunConfig }: ConfigHeaderProps) {
         )}
         <span className="px-1.5 py-0.5 bg-muted text-muted-foreground rounded">
           {XMLLM_STRATEGIES.find(v => v.id === config.strategy)?.name}
+        </span>
+        <span className={`px-1.5 py-0.5 rounded ${
+          config.parser === 'xml' 
+            ? 'bg-blue-500/10 text-blue-500'
+            : 'bg-purple-500/10 text-purple-500'
+        }`}>
+          {config.parser === 'xml' 
+            ? 'XML' 
+            : `Idio (${IDIO_FORMATS.find(f => f.name === config.idioFormat)?.name})`}
         </span>
       </div>
     </div>

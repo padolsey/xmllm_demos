@@ -183,6 +183,11 @@ setOutput(JSON.stringify(fictionBooks, null, 2));`
 for await (const color of colorStream) {
   setOutput(prev => prev + JSON.stringify(color, null, 2) + '\\n');
 }`
+  },
+  multiagentic: {
+    name: 'Multiagentic Solver/Orchestration',
+    description: '...',
+    code: `here`
   }
 };
 

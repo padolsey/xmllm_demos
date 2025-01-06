@@ -97,14 +97,13 @@ Give the flag name first in your response.`,
         },
         temperature: 0.7,
         max_tokens: 500,
-        model: ['openrouter:mistralai/ministral-3b', 'togetherai:fast', 'claude:fast', 'openai:fast'],
+        model: ['openrouter:mistralai/ministral-3b', 'togetherai:fast', 'anthropic:fast', 'openai:fast'],
         onChunk: (chunk: string) => {
           setRawXml(prev => prev + chunk)
         }
       })
 
       for await (const chunk of flagStream) {
-        console.log('chunk', chunk)
         if (((chunk as unknown) as FlagResponse)?.flag) {
           setFlag(((chunk as unknown) as FlagResponse).flag)
           setCurrentJson(chunk)
@@ -121,6 +120,10 @@ Give the flag name first in your response.`,
     if (e.key === 'Enter') {
       generateFlag()
     }
+  }
+
+  if (flag?.colors?.color?.length) {
+    flag.colors.color = flag.colors.color.filter(Boolean);
   }
 
   return (

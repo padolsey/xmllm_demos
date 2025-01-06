@@ -28,12 +28,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
-  const headersList = await headers()
-  const isColorsPage = headersList.get('x-is-colors-page') === '1'
-  const isModelTestingPage = headersList.get('x-is-model-testing') === '1'
+}) {
+  const pathname = new URL((await headers()).get('x-url') || 'http://localhost').pathname
+  const isIdeaPage = pathname.startsWith('/idea')
+  const isModelTestingPage = pathname.startsWith('/model-testing')
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -58,8 +58,8 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <ErrorProvider>
           <ThemeProvider>
-            <Navbar />
-            <main className="flex-1 p-4 sm:p-8">
+            {!isIdeaPage && <Navbar />}
+            <main className={isIdeaPage ? 'flex-1' : 'flex-1 p-4 sm:p-8'}>
               <div className={isModelTestingPage ? '' : 'max-w-[1800px] mx-auto'}>
                 {children}
               </div>

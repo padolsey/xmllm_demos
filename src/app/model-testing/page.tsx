@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { stream } from '@/utils/xmllm'
+import { stream, configure, types } from '@/utils/xmllm'
 import type { ModelPreference, HintType } from 'xmllm'
 import { useTheme } from '../theme-provider'
 import { useTestResults } from './hooks/useTestResults'
 import { MODEL_CONFIGS } from '@/config/model-testing/models'
 import { TestCase, TEST_CASES } from '@/config/model-testing/test-cases'
 import type { TestResult, ModelTestConfig } from './types'
+import { IDIO_FORMATS } from './types'
 import { X, RotateCw, Plus } from 'lucide-react'
 import PQueue from 'p-queue'
 import { ConfigItem } from './components/ConfigItem'
@@ -75,7 +76,7 @@ const generateStrategyComparisons = (modelId: string) => {
 }
 
 // Add these constants near the top of the file
-const RATE_LIMIT = 30 // requests per minute
+const RATE_LIMIT = 60 // requests per minute
 const RATE_WINDOW = 60 * 1000 // 1 minute in milliseconds
 
 // Add this helper function after the existing helper functions
@@ -100,6 +101,13 @@ const recordRequest = () => {
   localStorage.setItem('xmllm_requests', JSON.stringify(requests))
 }
 
+const createSchemaEvalContext = (schema: string) => {
+  // Create a new Function with 'types' in scope
+  return new Function('types', `
+    return (${schema})
+  `)
+}
+
 export default function ModelTesting() {
 
   // Add state for showing selector
@@ -116,12 +124,16 @@ export default function ModelTesting() {
     {
       modelId: 'qwen-7b-turbo',
       useHints: false,
-      strategy: 'default'
+      strategy: 'default',
+      parser: 'xml',
+      idioFormat: 'Classic'
     },
     {
       modelId: 'ministral-8b',
       useHints: false,
-      strategy: 'default'
+      strategy: 'default',
+      parser: 'xml',
+      idioFormat: 'Classic'
     }
   ])
 
@@ -152,13 +164,33 @@ export default function ModelTesting() {
         ...(lastConfig ? { ...lastConfig } : {
           modelId: DEFAULT_ENABLED_MODELS[0],
           useHints: false,
-          strategy: 'default'
+          strategy: 'default',
+          parser: 'xml',
+          idioFormat: 'Classic'
         })
       }]
     })
   }
 
   async function runTest(testCase: TestCase, testConfig: ModelTestConfig, forceRun: boolean = false) {
+    // Variable to accumulate XML chunks during streaming
+    let rawXml = ''
+    
+    // Find the selected format configuration
+    const formatConfig = IDIO_FORMATS.find(f => f.name === testConfig.idioFormat)?.config
+
+    // Configure the parser globally before running the test
+    configure({
+      globalParser: testConfig.parser,
+      idioSymbols: testConfig.parser === 'idio' ? formatConfig : undefined
+    })
+
+    // Clear previous result for this specific test/config combination
+    setResults(prev => prev.filter(r => 
+      !(JSON.stringify(r.config) === JSON.stringify(testConfig) && 
+        r.testId === testCase.id)
+    ))
+
     // Check rate limit first
     if (!checkRateLimit()) {
       const errorResult = {
@@ -187,7 +219,6 @@ export default function ModelTesting() {
     setRateLimitError(null)
     
     const startTime = Date.now()
-    let rawXml = ''
 
     try {
       // Record the request
@@ -195,9 +226,12 @@ export default function ModelTesting() {
       
       console.log('Starting test:', { testCase, testConfig })
       
-      const schema = eval(`(${testCase.schema})`)
+      // Pass testCase.schema to the function
+      const schemaEvalFn = createSchemaEvalContext(testCase.schema)
+      const schema = schemaEvalFn(types)
       console.log('Parsed schema:', schema)
 
+      // Create initial "ongoing" state
       const initialResult = {
         config: testConfig,
         testId: testCase.id,
@@ -215,10 +249,10 @@ export default function ModelTesting() {
       let streamConfig = {
         prompt: testCase.prompt,
         system: testCase.system,
-        max_tokens: 1200,
+        max_tokens: 2000,
         schema,
-        // cache: !forceRun,
-        cache: true,
+        cache: !forceRun,
+        // cache: true,
         model: modelConfig.config as ModelPreference,
         hints: testConfig.useHints ? eval(`(${testCase.hints})` as any) as HintType : undefined,
         strategy: testConfig.strategy,
@@ -233,12 +267,13 @@ export default function ModelTesting() {
       };
 
       console.log('Creating stream with config:', streamConfig)
-      const theStream = stream(streamConfig)
+      const theStream = await stream(streamConfig)
 
-      const result = await theStream.last()
+      const result = await theStream.last();
       console.log('Stream completed with result:', result)
 
-      const success = testCase.validate ? testCase.validate(result) : true
+      const validationResult = testCase.validate ? testCase.validate(result) : true
+      const success = validationResult === true ? true : validationResult
 
       const finalResult = {
         config: testConfig,
@@ -285,6 +320,7 @@ export default function ModelTesting() {
       ))
       saveResult(errorResult)
     } finally {
+      // Clear running state
       setRunningTests(prev => {
         const next = new Set(prev)
         next.delete(testKey)
@@ -320,25 +356,46 @@ export default function ModelTesting() {
     setSavedResults(prev => prev.filter(r => r.config?.modelId !== modelId))
   }
 
-  const runModelTests = async (modelId: string, configToRun: ModelTestConfig) => {
-    // Clear only this config's results
+  const runModelTests = async (modelId: string, config: ModelTestConfig, testId?: string) => {
+    const testsToRun = testId 
+      ? [TEST_CASES.find(t => t.id === testId)!]
+      : TEST_CASES
+
+    // Clear previous results for these specific tests
     setResults(prev => prev.filter(r => 
-      JSON.stringify(r.config) !== JSON.stringify(configToRun)
+      !(testsToRun.some(t => t.id === r.testId) && 
+        JSON.stringify(r.config) === JSON.stringify(config))
     ))
-    setSavedResults(prev => prev.filter(r => 
-      JSON.stringify(r.config) !== JSON.stringify(configToRun)
-    ))
-    
+
     const modelConfig = MODEL_CONFIGS.find(m => m.id === modelId)
     if (!modelConfig) return
-    
-    const queue = new PQueue({ concurrency: MAX_CONCURRENT_TESTS })
 
-    const testPromises = TEST_CASES.map(testCase => 
-      queue.add(() => runTest(testCase, configToRun, true))
-    )
+    const queue = new PQueue({ concurrency: 1 }) // Run one at a time for single test runs
 
-    await Promise.all(testPromises)
+    for (const testCase of testsToRun) {
+      const testKey = `${JSON.stringify(config)}-${testCase.id}`
+      
+      // Skip if already running
+      if (runningTests.has(testKey)) continue
+      
+      setRunningTests(prev => {
+        const next = new Set(prev)
+        next.add(testKey)
+        return next
+      })
+
+      try {
+        await queue.add(() => runTest(testCase, config, true))
+      } catch (error) {
+        console.error('Test error:', error)
+      } finally {
+        setRunningTests(prev => {
+          const next = new Set(prev)
+          next.delete(testKey)
+          return next
+        })
+      }
+    }
   }
 
   // Add toggle function
@@ -429,7 +486,7 @@ export default function ModelTesting() {
           )}
         </header>
 
-        <div className="grid grid-cols-[400px,1fr] gap-8">
+        <div className="grid grid-cols-[450px,1fr] gap-8">
           <div className="space-y-4">
             <div className="sticky top-8">
               <div className="space-y-4 p-4 border border-border rounded-lg">
