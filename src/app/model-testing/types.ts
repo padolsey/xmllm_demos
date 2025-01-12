@@ -109,7 +109,7 @@ export interface TestResult {
   testId: string;
   rawXml: string;
   parsedJson: any;
-  success: boolean | 'ongoing';
+  success: boolean | 'ongoing' | string;
   error?: string;
   timing: {
     start: number;

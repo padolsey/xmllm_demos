@@ -752,11 +752,11 @@ export const TEST_CASES: TestCase[] = [
       if (result.numbers.length < 3 || result.numbers.length > 5) {
         return 'Numbers array must have 3-5 elements'
       }
-      if (!result.numbers.every(n => n >= 1 && n <= 10)) {
+      if (!result.numbers.every((n: number) => n >= 1 && n <= 10)) {
         return 'All numbers must be between 1 and 10'
       }
       // Check if array is sorted
-      if (!result.numbers.every((n, i) => i === 0 || n >= result.numbers[i - 1])) {
+      if (!result.numbers.every((n: number, i: number) => i === 0 || n >= result.numbers[i - 1])) {
         return 'Numbers array must be sorted'
       }
       
@@ -766,7 +766,7 @@ export const TEST_CASES: TestCase[] = [
       if (result.tags.length === 0) {
         return 'Tags array cannot be empty (should have default)'
       }
-      if (!result.tags.every(t => typeof t === 'string' && t === t.toLowerCase())) {
+      if (!result.tags.every((t: string) => typeof t === 'string' && t === t.toLowerCase())) {
         return 'All tags must be lowercase strings'
       }
       // Check for duplicates
