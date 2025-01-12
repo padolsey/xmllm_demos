@@ -292,7 +292,7 @@ export default function ModelTesting() {
 
       setResults(prev => prev.map(r => 
         JSON.stringify(r.config) === JSON.stringify(testConfig) && r.testId === testCase.id
-          ? { ...finalResult, success: finalResult.success === true ? true : false }
+          ? finalResult
           : r
       ))
       saveResult(finalResult as TestResult)

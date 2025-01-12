@@ -4,7 +4,7 @@ import { useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { xmllm, stream, simple } from '@/utils/xmllm'
+import { xmllm, stream, simple, types } from '@/utils/xmllm'
 import { useTheme } from '../theme-provider'
 
 const DEFAULT_MODEL = ['togetherai:fast', 'openrouter:mistralai/ministral-3b']
@@ -188,6 +188,134 @@ for await (const color of colorStream) {
     name: 'Multiagentic Solver/Orchestration',
     description: '...',
     code: `here`
+  },
+  arrayOperations: {
+    name: 'Array Operations',
+    description: 'Test array-level transformations and validation',
+    code: `const arrayTest = xmllm(({ prompt }) => [
+  prompt({
+    messages: [{
+      role: 'user',
+      content: 'Generate a list of 4 numbers between 1-10 and 2 tags for categorization'
+    }],
+    schema: {
+      numbers: types.items(
+        types.number("A number between 1-10")
+          .withTransform(n => {
+            if (typeof n !== 'number' || isNaN(n)) return null;
+            return Math.min(10, Math.max(1, n));
+          })
+      )
+      .withTransform(arr => {
+        if (!Array.isArray(arr) || arr.length < 3 || arr.length > 5) return null;
+        return arr.filter(n => n !== null).sort((a, b) => a - b);
+      }),
+      
+      tags: types.items(
+        types.string("A tag name")
+          .withTransform(s => {
+            if (typeof s !== 'string') return null;
+            return s.toLowerCase().trim();
+          })
+      )
+      .withDefault(['general'])
+      .withTransform(arr => {
+        if (!Array.isArray(arr)) return ['general'];
+        return [...new Set(arr.filter(t => t !== null))];
+      })
+    },
+    model: DEFAULT_MODEL
+  })
+]);
+
+for await (const update of arrayTest) {
+  setOutput(prev => prev + JSON.stringify(update, null, 2) + '\\n');
+}`
+  },
+
+  nestedItems: {
+    name: 'Nested Items Structure',
+    description: 'Complex nested array structures with validation',
+    code: `const orgTest = xmllm(({ prompt }) => [
+  prompt({
+    messages: [{
+      role: 'user',
+      content: 'Create an organization structure with 2 departments, each with 1-2 teams and 2-3 team members'
+    }],
+    schema: {
+      organization: {
+        departments: types.items({
+          name: types.string("Department name"),
+          budget: types.number("Budget in USD")
+            .withTransform(n => {
+              if (typeof n !== 'number' || isNaN(n)) return null;
+              return Math.round(n);
+            }),
+          teams: types.items({
+            name: types.string("Team name"),
+            members: types.items({
+              name: types.string("Member name"),
+              role: types.enum("Role", ["LEAD", "SENIOR", "JUNIOR"]),
+              skills: types.items(
+                types.string("Skill name")
+                  .withTransform(s => {
+                    if (typeof s !== 'string') return null;
+                    return s.toLowerCase();
+                  })
+              )
+            })
+            .withTransform(arr => {
+              // Limit to 3 members
+              if (!Array.isArray(arr)) return [];
+              return arr.slice(0, 3);
+            })
+          })
+        })
+      }
+    },
+    model: DEFAULT_MODEL
+  })
+]);
+
+for await (const update of orgTest) {
+  setOutput(prev => prev + JSON.stringify(update, null, 2) + '\\n');
+}`
+  },
+
+  cdataContent: {
+    name: 'CDATA Content',
+    description: 'Raw content preservation with metadata',
+    code: `const cdataTest = xmllm(({ prompt }) => [
+  prompt({
+    messages: [{
+      role: 'user',
+      content: 'Generate a code snippet showing a simple React component with TypeScript props interface'
+    }],
+    schema: {
+      document: {
+        metadata: {
+          format: types.enum("Format", ["HTML", "MARKDOWN", "CODE"]),
+          language: types.string("Programming language if format is CODE")
+            .withTransform(s => {
+              // Only require language for CODE format
+              if (this?.format !== 'CODE') return null;
+              return typeof s === 'string' ? s : null;
+            })
+        },
+        content: types.raw("Content in specified format")
+          .withTransform(content => {
+            if (!content || typeof content !== 'string') return null;
+            return content.trim();
+          })
+      }
+    },
+    model: DEFAULT_MODEL
+  })
+]);
+
+for await (const update of cdataTest) {
+  setOutput(prev => prev + JSON.stringify(update, null, 2) + '\\n');
+}`
   }
 };
 
@@ -210,6 +338,7 @@ export default function Home() {
         'stream',
         'simple',
         'DEFAULT_MODEL',
+        'types',
         `return (async () => {
           try {
             ${code}
@@ -220,7 +349,7 @@ export default function Home() {
         })()
       `)
 
-      await fn(xmllm, setOutput, stream, simple, DEFAULT_MODEL)
+      await fn(xmllm, setOutput, stream, simple, DEFAULT_MODEL, types)
     } catch (error) {
       console.error('Test error:', error)
       setOutput(prev => prev + `\nError: ${error instanceof Error ? error.message : 'Unknown error'}`)

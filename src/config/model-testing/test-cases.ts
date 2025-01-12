@@ -707,5 +707,178 @@ export const TEST_CASES: TestCase[] = [
 
       return true
     }
+  },
+  {
+    id: 'array-operations',
+    name: 'Array Operations',
+    description: 'Test array-level transformations and validation with types.items()',
+    schema: `{
+    numbers: types.items(
+      types.number("A number between 1-10")
+        .withTransform(n => {
+          // Validation + transformation
+          if (typeof n !== 'number' || isNaN(n)) return null;
+          return Math.min(10, Math.max(1, n));
+        })
+    )
+    .withTransform(arr => {
+      // Array-level validation + transformation
+      if (!Array.isArray(arr) || arr.length < 3 || arr.length > 5) return null;
+      return arr.filter(n => n !== null).sort((a, b) => a - b);
+    }),
+    
+    tags: types.items(
+      types.string("A tag name")
+        .withTransform(s => {
+          if (typeof s !== 'string') return null;
+          return s.toLowerCase().trim();
+        })
+    )
+    .withDefault(['general'])
+    .withTransform(arr => {
+      if (!Array.isArray(arr)) return ['general'];
+      return [...new Set(arr.filter(t => t !== null))];
+    })
+  }`,
+    hints: `{
+    numbers: "3-5 numbers that will be sorted ascending",
+    tags: "1-3 unique category tags in lowercase"
+  }`,
+    prompt: 'Generate a list of 4 numbers between 1-10 and 2 tags for categorization.',
+    validate: (result) => {
+      if (!result?.numbers || !Array.isArray(result.numbers)) {
+        return 'Missing or invalid numbers array'
+      }
+      if (result.numbers.length < 3 || result.numbers.length > 5) {
+        return 'Numbers array must have 3-5 elements'
+      }
+      if (!result.numbers.every(n => n >= 1 && n <= 10)) {
+        return 'All numbers must be between 1 and 10'
+      }
+      // Check if array is sorted
+      if (!result.numbers.every((n, i) => i === 0 || n >= result.numbers[i - 1])) {
+        return 'Numbers array must be sorted'
+      }
+      
+      if (!result?.tags || !Array.isArray(result.tags)) {
+        return 'Missing or invalid tags array'
+      }
+      if (result.tags.length === 0) {
+        return 'Tags array cannot be empty (should have default)'
+      }
+      if (!result.tags.every(t => typeof t === 'string' && t === t.toLowerCase())) {
+        return 'All tags must be lowercase strings'
+      }
+      // Check for duplicates
+      if (new Set(result.tags).size !== result.tags.length) {
+        return 'Tags must be unique'
+      }
+      return true
+    }
+  },
+  {
+    id: 'nested-items',
+    name: 'Nested Items Structure',
+    description: 'Test deeply nested types.items() with complex transformations',
+    schema: `{
+      organization: {
+        departments: types.items({
+          name: types.string("Department name"),
+          budget: types.number("Budget in USD")
+            .withTransform(n => {
+              if (typeof n !== 'number' || isNaN(n)) return null;
+              return Math.round(n);
+            }),
+          teams: types.items({
+            name: types.string("Team name"),
+            members: types.items({
+              name: types.string("Member name"),
+              role: types.enum("Role", ["LEAD", "SENIOR", "JUNIOR"]),
+              skills: types.items(
+                types.string("Skill name")
+                  .withTransform(s => {
+                    if (typeof s !== 'string') return null;
+                    return s.toLowerCase();
+                  })
+              )
+            })
+            .withTransform(arr => {
+              // Limit to 3 members
+              if (!Array.isArray(arr)) return [];
+              return arr.slice(0, 3);
+            })
+          })
+        })
+      }
+    }`,
+    hints: `{
+      organization: {
+        departments: [{
+          name: "Department name like 'Engineering' or 'Marketing'",
+          budget: "Annual budget in USD",
+          teams: [{
+            name: "Team name like 'Frontend' or 'Growth'",
+            members: [{
+              name: "Full name of team member",
+              role: "One of: LEAD, SENIOR, or JUNIOR",
+              skills: ["Relevant technical or soft skills"]
+            }]
+          }]
+        }]
+      }
+    }`,
+    prompt: 'Create an organization structure with 2 departments, each with 1-2 teams and 2-3 team members.',
+    validate: (result) => {
+      // Add validation logic here
+      return true
+    }
+  },
+  {
+    id: 'cdata-content',
+    name: 'CDATA Content Handling',
+    description: 'Test raw type with CDATA content preservation',
+    schema: `{
+      document: {
+        metadata: {
+          format: types.enum("Format", ["HTML", "MARKDOWN", "CODE"]),
+          language: types.string("Programming language if format is CODE")
+            .withTransform(s => {
+              return typeof s === 'string' ? s : null;
+            })
+        },
+        content: types.raw("Content in specified format")
+          .withTransform(content => {
+            if (!content || typeof content !== 'string') return null;
+            return content.trim();
+          })
+      }
+    }`,
+    hints: `{
+      document: {
+        metadata: {
+          format: "Content format type",
+          language: "Required if format is CODE"
+        },
+        content: "Content in the specified format, will be preserved exactly as written"
+      }
+    }`,
+    prompt: 'Generate a code snippet showing a simple React component with TypeScript props interface.',
+    validate: (result) => {
+      console.log('CDATA RESULT', result, {
+        missingFormat: !result?.document?.metadata?.format,
+        missingContent: !result?.document?.content,
+        missingLanguage: result.document.metadata.format === 'CODE' && !result.document.metadata.language
+      })
+      if (!result?.document?.metadata?.format) {
+        return 'Missing format specification'
+      }
+      if (!result?.document?.content) {
+        return 'Missing content'
+      }
+      if (result.document.metadata.format === 'CODE' && !result.document.metadata.language) {
+        return 'Missing language specification for CODE format'
+      }
+      return true
+    }
   }
 ] 
