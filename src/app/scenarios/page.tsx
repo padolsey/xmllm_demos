@@ -316,6 +316,71 @@ for await (const update of orgTest) {
 for await (const update of cdataTest) {
   setOutput(prev => prev + JSON.stringify(update, null, 2) + '\\n');
 }`
+  },
+
+  bufferBehavior: {
+    name: 'Buffer Behavior Demo',
+    description: 'Compare buffered vs unbuffered streaming with detailed word analysis',
+    code: `// Helper to format timestamps
+    const getTimestamp = () => new Date().getTime();
+    const startTime = getTimestamp();
+    const formatTime = (time) => (time - startTime).toString().padStart(4, '0') + 'ms';
+
+    // First try without buffering
+    const unbufferedStream = stream({
+      prompt: \`Analyze this sentence word by word with detailed metadata:
+"The curious robot discovered a colorful butterfly"\`,
+      schema: {
+        word: {
+          text: String,
+          analysis: {
+            partOfSpeech: String,
+            syllables: Number,
+            sentiment: types.enum('Sentiment', ['POSITIVE', 'NEUTRAL', 'NEGATIVE']),
+            associations: [String]
+          }
+        }
+      },
+      model: DEFAULT_MODEL,
+      buffer: false
+    });
+
+    setOutput('=== Unbuffered Stream (watch timestamps) ===\\n');
+    for await (const update of unbufferedStream) {
+      const timestamp = formatTime(getTimestamp());
+      setOutput(prev => prev + \`[\${timestamp}] \${JSON.stringify(update)}\\n\`);
+    }
+
+    // Pause between streams
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Then try with buffering
+    const bufferedStream = stream({
+      prompt: \`Analyze this sentence word by word with detailed metadata:
+"The friendly alien discovered a glowing crystal"\`,
+      schema: {
+        word: {
+          text: String,
+          analysis: {
+            partOfSpeech: String,
+            syllables: Number,
+            sentiment: types.enum('Sentiment', ['POSITIVE', 'NEUTRAL', 'NEGATIVE']),
+            associations: [String]
+          }
+        }
+      },
+      model: DEFAULT_MODEL,
+      buffer: {
+        timeout: 100,   // Increased timeout to make buffering more obvious
+        maxSize: 1024
+      }
+    });
+
+    setOutput(prev => prev + '\\n=== Buffered Stream (notice grouped updates) ===\\n');
+    for await (const update of bufferedStream) {
+      const timestamp = formatTime(getTimestamp());
+      setOutput(prev => prev + \`[\${timestamp}] \${JSON.stringify(update)}\\n\`);
+    }`
   }
 };
 

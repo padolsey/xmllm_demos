@@ -33,16 +33,16 @@ export const MODEL_CONFIGS: ModelConfig[] = [
       name: 'claude-3-haiku-20240307'
     }
   },
-  // {
-  //   id: 'claude3-sonnet',
-  //   name: 'Claude 3 Sonnet',
-  //   input_price: 3.00, // Price per 1M input tokens
-  //   output_price: 15.00, // Price per 1M output tokens
-  //   config: {
-  //     inherit: 'claude',
-  //     name: 'claude-3-sonnet-20240229'
-  //   }
-  // },
+  {
+    id: 'claude3-sonnet',
+    name: 'Claude 3 Sonnet',
+    input_price: 3.00, // Price per 1M input tokens
+    output_price: 15.00, // Price per 1M output tokens
+    config: {
+      inherit: 'claude',
+      name: 'claude-3-sonnet-20240229'
+    }
+  },
   // {
   //   id: 'claude3-opus',
   //   name: 'Claude 3.5 Sonnet',
@@ -89,7 +89,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   // },
   {
     id: 'qwen-7b-turbo',
-    name: 'Qwen 2.5 7B Turbo',
+    name: 'Qwen 2.5 7B Turbo (Together AI)',
     input_price: 0.20,
     output_price: 0.20,
     config: {
@@ -99,7 +99,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   },
   {
     id: 'llama3-8b',
-    name: 'Llama 3.1 8B',
+    name: 'Llama 3.1 8B (Together AI)',
     input_price: 0.18,
     output_price: 0.18,
     config: {
@@ -109,17 +109,17 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   },
   {
     id: 'mistral-7b',
-    name: 'Mistral 7B',
+    name: 'Mistral 7B 0.3 (Together AI)',
     input_price: 0.20,
     output_price: 0.20,
     config: {
       inherit: 'togetherai',
-      name: 'mistralai/Mistral-7B-Instruct-v0.1'
+      name: 'mistralai/Mistral-7B-Instruct-v0.3'
     }
   },
   {
     id: 'llama2-7b',
-    name: 'LLaMA-2 7B Chat',
+    name: 'LLaMA-2 7B Chat (Together AI)',
     input_price: 0.20,
     output_price: 0.20,
     config: {
@@ -129,7 +129,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   },
   {
     id: 'solar-11b',
-    name: 'SOLAR 11B',
+    name: 'SOLAR 11B (Together AI)',
     input_price: 0.30,
     output_price: 0.30,
     config: {
@@ -141,7 +141,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   // Together AI Models - Moderate ($0.31-$0.80)
   {
     id: 'nous-mixtral',
-    name: 'Nous Hermes 2 Mixtral',
+    name: 'Nous Hermes 2 Mixtral (Together AI)',
     input_price: 0.60,
     output_price: 0.60,
     config: {
@@ -150,18 +150,8 @@ export const MODEL_CONFIGS: ModelConfig[] = [
     }
   },
   {
-    id: 'codellama-34b',
-    name: 'Code Llama 34B',
-    input_price: 0.78,
-    output_price: 0.78,
-    config: {
-      inherit: 'togetherai',
-      name: 'codellama/CodeLlama-34b-Instruct-hf'
-    }
-  },
-  {
     id: 'qwen-coder-32b',
-    name: 'Qwen 2.5 Coder 32B',
+    name: 'Qwen 2.5 Coder 32B (Together AI)',
     input_price: 0.80,
     output_price: 0.80,
     config: {
@@ -173,12 +163,12 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   // Together AI Models - Expensive (>$0.80)
   {
     id: 'llama3-70b',
-    name: 'Llama 3.1 70B',
+    name: 'Llama 3.3 70B (Together AI)',
     input_price: 0.88,
     output_price: 0.88,
     config: {
       inherit: 'togetherai',
-      name: 'meta-llama/Meta-Llama-3.1-70B-Instruct'
+      name: 'meta-llama/Llama-3.3-70B-Instruct-Turbo'
     }
   },
   // {
@@ -210,32 +200,44 @@ export const MODEL_CONFIGS: ModelConfig[] = [
     output_price: 0.20, // Estimated price
     config: {
       inherit: 'openrouter',
-      name: 'mistralai/mistral-7b'
+      name: 'mistralai/mistral-7b-instruct'
+    }
+  },
+  //microsoft/phi-3.5-mini-128k-instruct
+
+  {
+    id: 'phi-3.5-mini',
+    name: 'Phi 3.5 Mini (OpenRouter)',
+    input_price: 0.01,
+    output_price: 0.01,
+    config: {
+      inherit: 'openrouter',
+      name: 'microsoft/phi-3.5-mini-128k-instruct'
     }
   },
   {
     id: 'mixtral-8x7b',
-    name: 'Mixtral 8x7B MOE',
+    name: 'Mixtral 8x7B (OpenRouter)',
     input_price: 0.60,  // Estimated price
     output_price: 0.60, // Estimated price
     config: {
       inherit: 'openrouter',
-      name: 'mistralai/mixtral-8x7b-moe'
+      name: 'mistralai/mixtral-8x7b'
     }
   },
   {
-    id: 'llama2-70b-or',
-    name: 'LLaMA-2 70B (OpenRouter)',
+    id: 'llama3-70b-or',
+    name: 'LLaMA-3 70B (OpenRouter)',
     input_price: 1.00,  // Estimated price
     output_price: 1.00, // Estimated price
     config: {
       inherit: 'openrouter', 
-      name: 'meta-llama/llama-2-70b'
+      name: 'meta-llama/llama-3.3-70b-instruct'
     }
   },
   {
     id: 'ministral-3b',
-    name: 'Ministral 3B',
+    name: 'Ministral 3B (OpenRouter)',
     input_price: 0.04,
     output_price: 0.04,
     config: {
@@ -245,7 +247,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   },
   {
     id: 'ministral-8b',
-    name: 'Ministral 8B',
+    name: 'Ministral 8B (OpenRouter)',
     input_price: 0.10,
     output_price: 0.10,
     config: {
@@ -255,7 +257,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   },
   {
     id: 'mistral-large',
-    name: 'Mistral Large 2411',
+    name: 'Mistral Large 2411 (OpenRouter)',
     input_price: 2.00,
     output_price: 6.00,
     config: {
@@ -265,17 +267,17 @@ export const MODEL_CONFIGS: ModelConfig[] = [
   },
   {
     id: 'gemini-exp',
-    name: 'Gemini Experimental',
+    name: 'Gemini Experimental (OpenRouter)',
     input_price: 0,
     output_price: 0,
     config: {
       inherit: 'openrouter',
       name: 'google/gemini-exp-1206:free'
-    }
+    } 
   },
   {
     id: 'nova-lite',
-    name: 'Nova Lite 1.0',
+    name: 'Nova Lite 1.0 (OpenRouter)',
     input_price: 0.06,
     output_price: 0.24,
     config: {

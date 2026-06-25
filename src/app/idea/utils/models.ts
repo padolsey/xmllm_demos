@@ -15,4 +15,4 @@ export function shuffle<T>(array: T[]): T[] {
     [newArray[i], newArray[j]] = [newArray[j], newArray[i]]
   }
   return newArray
-} 
+}

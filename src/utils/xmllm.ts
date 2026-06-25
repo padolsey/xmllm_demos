@@ -34,14 +34,14 @@ configure({
       }
     },
     errorMessages: {
-      genericFailure: `<error>UNKNOWN_FAILURE: ${genericApology}</error>`,
-      rateLimitExceeded: `<error>RATE_LIMIT_EXCEEDED: ${genericApology}</error>`,
-      invalidRequest: `<error>INVALID_REQUEST: ${genericApology}</error>`,
-      authenticationFailed: `<error>AUTHENTICATION_FAILED: ${genericApology}</error>`,
-      resourceNotFound: `<error>RESOURCE_NOT_FOUND: ${genericApology}</error>`,
-      serviceUnavailable: `<error>SERVICE_UNAVAILABLE: ${genericApology}</error>`,
-      networkError: `<error>NETWORK_ERROR: ${genericApology}</error>`,
-      unexpectedError: `<error>UNEXPECTED_ERROR: ${genericApology}</error>`
+      genericFailure: `<error>UNKNOWN_FAILURE: (generic) ${genericApology}</error>`,
+      rateLimitExceeded: `<error>RATE_LIMIT_EXCEEDED: (rate limit) ${genericApology}</error>`,
+      invalidRequest: `<error>INVALID_REQUEST: (invalid request) ${genericApology}</error>`,
+      authenticationFailed: `<error>AUTHENTICATION_FAILED: (authentication) ${genericApology}</error>`,
+      resourceNotFound: `<error>RESOURCE_NOT_FOUND: (resource not found) ${genericApology}</error>`,
+      serviceUnavailable: `<error>SERVICE_UNAVAILABLE: (service unavailable) ${genericApology}</error>`,
+      networkError: `<error>NETWORK_ERROR: (network error) ${genericApology}</error>`,
+      unexpectedError: `<error>UNEXPECTED_ERROR: (unexpected error) ${genericApology}</error>`
     }
   },
   clientProvider
