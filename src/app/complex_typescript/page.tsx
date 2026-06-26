@@ -98,7 +98,7 @@ export default function ComplexTypescript() {
       const headlineStream = stream(
         'List 3 recent tech headlines. Format each as <headline>...</headline>',
         {
-          model: 'togetherai:fast',
+          model: 'openrouter:openai/gpt-oss-120b:nitro',
           schema: {
             headline: Array(String)
           }
@@ -136,7 +136,7 @@ export default function ComplexTypescript() {
         {
           schema: analysisSchema as unknown as Schema,
           max_tokens: 2000,
-          model: ['togetherai:fast'],
+          model: ['openrouter:openai/gpt-oss-120b:nitro', 'openrouter:openai/gpt-4o-mini'],
           hints: analysisHints as unknown as Hints
         }
       ) as AnalysisResult;
@@ -156,7 +156,7 @@ export default function ComplexTypescript() {
          
          Format as <summary>...</summary>`,
         {
-          model: 'togetherai:good',
+          model: 'openrouter:openai/gpt-oss-120b:nitro',
           max_tokens: 2000,
           onChunk: (chunk: any) => {
             console.debug('Summary Chunk:', chunk);

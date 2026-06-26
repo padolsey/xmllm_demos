@@ -6,15 +6,10 @@ import { useTheme } from '../theme-provider'
 
 // Available models configuration
 const MODEL_OPTIONS = [
-  { id: 'openrouter:mistralai/ministral-3b', name: 'Mistral 3B (OpenRouter)' },
-  { id: 'anthropic:superfast', name: 'Claude Haiku (Super Fast)' },
-  { id: 'anthropic:fast', name: 'Claude Haiku (Fast)' },
-  { id: 'anthropic:good', name: 'Claude Sonnet (Good)' },
-  { id: 'openai:superfast', name: 'GPT-4 Mini (Super Fast)' },
-  { id: 'openai:fast', name: 'GPT-4 Mini (Fast)' },
-  { id: 'openai:good', name: 'GPT-4 (Good)' },
-  { id: 'togetherai:fast', name: 'Together AI (Fast)' },
-  { id: 'togetherai:good', name: 'Together AI (Good)' },
+  { id: 'openrouter:openai/gpt-oss-120b:nitro', name: 'GPT-OSS 120B Nitro (OpenRouter)' },
+  { id: 'openrouter:openai/gpt-oss-20b:nitro', name: 'GPT-OSS 20B Nitro (OpenRouter)' },
+  { id: 'openrouter:openai/gpt-4o-mini', name: 'GPT-4o-mini (OpenRouter)' },
+  { id: 'openrouter:meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B (OpenRouter)' },
 ]
 
 interface Message {
@@ -40,11 +35,11 @@ interface PanelConfig {
 }
 
 const DEFAULT_CONFIG: PanelConfig = {
-  model: 'openrouter:mistralai/ministral-3b',
+  model: 'openrouter:openai/gpt-oss-120b:nitro',
   systemPrompt: '',
   messages: [{ role: 'user', content: '' }],
   temperature: 0.7,
-  maxTokens: 1000,
+  maxTokens: 1500,
   topP: 1.0,
   stop: '',
   presencePenalty: 0,

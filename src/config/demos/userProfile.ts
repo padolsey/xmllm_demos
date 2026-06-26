@@ -99,7 +99,7 @@ export const userProfileDemo: DemoConfig = {
   prompt: "Generate a fun and interesting user profile for a tech professional based somewhere in the world. Seed: not cyberpunk, not USA, not stereotypical.",
   system: "You are a profile generator. Create engaging user profiles with colorful details. Do not over-focus on locale in determinising interests. Do not over-focus on job in determining hobbies.",
   temperature: 0.7,
-  maxTokens: 1000,
+  maxTokens: 1500,
   component: LiveProfile,
   transform: (data) => ({
     name: data.name,

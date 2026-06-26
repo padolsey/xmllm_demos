@@ -7,7 +7,7 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { xmllm, stream, simple, types } from '@/utils/xmllm'
 import { useTheme } from '../theme-provider'
 
-const DEFAULT_MODEL = ['togetherai:fast', 'openrouter:mistralai/ministral-3b']
+const DEFAULT_MODEL = ['openrouter:openai/gpt-oss-120b:nitro', 'openrouter:openai/gpt-4o-mini']
 
 // Just store the example code strings
 const tests = {
@@ -186,8 +186,36 @@ for await (const color of colorStream) {
   },
   multiagentic: {
     name: 'Multiagentic Solver/Orchestration',
-    description: '...',
-    code: `here`
+    description: 'Orchestrate several LLM agents — a Proposer, parallel Critics, and a Synthesizer — to solve a problem',
+    code: `// A mini multi-agent solver: a Proposer drafts candidate solutions,
+// three Critics score them in parallel (each its own LLM call),
+// and a Synthesizer reconciles the votes into one recommendation.
+const problem = 'How might a small town reduce food waste?';
+
+setOutput('🧠 Proposer drafting candidate solutions...\\n');
+const { ideas } = await simple(
+  'Propose exactly 3 distinct, concrete solutions to: "' + problem + '"',
+  { schema: { ideas: { idea: [types.string('a concrete solution')] } }, model: DEFAULT_MODEL }
+);
+ideas.idea.forEach((s, i) => setOutput(prev => prev + '   ' + (i + 1) + '. ' + s + '\\n'));
+
+const lenses = ['feasibility', 'cost', 'community impact'];
+setOutput(prev => prev + '\\n🔍 Critics voting in parallel (' + lenses.join(', ') + ')...\\n');
+const numbered = ideas.idea.map((s, i) => (i + 1) + '. ' + s).join('\\n');
+const votes = await Promise.all(lenses.map(lens =>
+  simple(
+    'You judge purely on ' + lens + '. Of these solutions, which single one is best? Give its number and a one-line reason.\\n' + numbered,
+    { schema: { pick: types.number('best solution number'), reason: types.string('one-line reason') }, model: DEFAULT_MODEL }
+  ).then(v => ({ lens, ...v }))
+));
+votes.forEach(v => setOutput(prev => prev + '   [' + v.lens + '] picks #' + v.pick + ' — ' + v.reason + '\\n'));
+
+setOutput(prev => prev + '\\n🤝 Synthesizer reconciling the votes...\\n');
+const { recommendation } = await simple(
+  'Solutions:\\n' + numbered + '\\n\\nExpert votes: ' + JSON.stringify(votes) + '\\n\\nReconcile these perspectives into one final recommendation.',
+  { schema: { recommendation: { winner: types.string('the chosen solution'), rationale: types.string('why it wins across perspectives'), oneImprovement: types.string('one concrete improvement') } }, model: DEFAULT_MODEL }
+);
+setOutput(prev => prev + '\\n✅ Final:\\n' + JSON.stringify(recommendation, null, 2) + '\\n');`
   },
   arrayOperations: {
     name: 'Array Operations',

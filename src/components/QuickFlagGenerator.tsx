@@ -97,8 +97,8 @@ Give the flag name first in your response.`,
           }
         } as unknown as Schema,
         temperature: 0.7,
-        max_tokens: 500,
-        model: ['openrouter:mistralai/ministral-3b', 'togetherai:fast', 'anthropic:fast', 'openai:fast'],
+        max_tokens: 1500,
+        model: ['openrouter:openai/gpt-oss-120b:nitro', 'openrouter:openai/gpt-4o-mini'],
         onChunk: (chunk: string) => {
           setRawXml(prev => prev + chunk)
         }

@@ -218,7 +218,7 @@ export function UserProfileDemo() {
         prompt: "Generate a fun and interesting user profile for a tech professional based somewhere in the world. Seed: not cyberpunk, not USA, not stereotypical.",
         schema,
         temperature: 0.7,
-        max_tokens: 1000,
+        max_tokens: 1500,
         onChunk: (rawChunk: string) => {
           setXmlContent(prev => prev + rawChunk)
         },
