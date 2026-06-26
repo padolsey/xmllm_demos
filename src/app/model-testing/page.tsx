@@ -16,7 +16,7 @@ import { TestTableResults } from './components/TestTableResults'
 import { CompareStrategiesDialog } from './components/CompareStrategiesDialog'
 
 // Define the default enabled models
-const DEFAULT_ENABLED_MODELS = ['qwen-7b-turbo', 'ministral-8b']
+const DEFAULT_ENABLED_MODELS = ['llama-3.1-8b', 'gpt-4o-mini']
 
 // Add XMLLM strategies type
 type XMLLMStrategy = {
@@ -124,14 +124,14 @@ export default function ModelTesting() {
   const [collapsedConfigs, setCollapsedConfigs] = useState<Set<number>>(new Set())
   const [activeConfigs, setActiveConfigs] = useState<ModelTestConfig[]>([
     {
-      modelId: 'qwen-7b-turbo',
+      modelId: 'llama-3.1-8b',
       useHints: false,
       strategy: 'default',
       parser: 'xml',
       idioFormat: 'Classic'
     },
     {
-      modelId: 'ministral-8b',
+      modelId: 'gpt-4o-mini',
       useHints: false,
       strategy: 'default',
       parser: 'xml',

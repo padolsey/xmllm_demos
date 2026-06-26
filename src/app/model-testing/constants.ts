@@ -33,6 +33,6 @@ export const XMLLM_STRATEGIES: XMLLMStrategy[] = [
   }
 ]
 
-export const DEFAULT_ENABLED_MODELS = ['claude3-haiku', 'sonar-small', 'gpt-4o-mini'] as const
+export const DEFAULT_ENABLED_MODELS = ['llama-3.1-8b', 'gpt-4o-mini'] as const
 
 export const MAX_CONCURRENT_TESTS = 3 
