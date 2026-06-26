@@ -54,7 +54,7 @@ export default function FluidDemo() {
       if (useRealLLM) {
 
         const theStream = stream({
-          model: ['togetherai:fast', 'anthropic:fast', 'openai:fast'],
+          model: ['openrouter:openai/gpt-oss-120b:nitro', 'openrouter:openai/gpt-4o-mini'],
           prompt: currentDemo.prompt,
           schema: currentDemo.schema,
           temperature: currentDemo.temperature,

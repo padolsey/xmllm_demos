@@ -60,7 +60,7 @@ export const speciesDemo: DemoConfig = {
   prompt: "Generate a unique and imaginative alien species profile with a distinctive flag design. Include specific details about their physiology, society, and technology level. Make the flag colors meaningful to their culture. Describe the specific details (like the flag meaning, physiology, society, technology) in only a couple sentences each.) Don't use too much text.",
   system: "You are a xenoanthropologist specializing in documenting alien species. Create detailed, creative species profiles with plausible yet unique characteristics. For flags, use 3-4 colors and create simple SVG paths (e.g., 'M 10 10 H 90 V 90 H 10 Z' or beziers for more stranger expressions). Make the species feel truly alien yet relatable.",
   temperature: .8,
-  maxTokens: 1000,
+  maxTokens: 1500,
   component: SpeciesProfile,
   transform: (data) => ({
     name: data.name,

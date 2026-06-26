@@ -136,7 +136,7 @@ export async function evaluateIdeas(
       {
         schema: agentResponseSchema,
         model: selectedModels as any,
-        max_tokens: 1000
+        max_tokens: 1500
       }
     ).last() as unknown as any
 
@@ -235,7 +235,7 @@ Respond with:
   const result = await stream(prompt, {
     schema: problemIdeasSchema,
     model: selectedModels as any,
-    max_tokens: 1000
+    max_tokens: 1500
   }).last() as unknown as any
 
   if (!result?.ideas?.idea) {

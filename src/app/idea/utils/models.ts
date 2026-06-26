@@ -1,11 +1,8 @@
 export const MODELS = [
-  'openrouter:mistralai/ministral-3b',
-  'togetherai:fast',
-  'anthropic:fast',
-  'openai:fast',
-  'anthropic:good',
-  'openai:good',
-  'togetherai:good'
+  'openrouter:openai/gpt-oss-120b:nitro',
+  'openrouter:openai/gpt-oss-20b:nitro',
+  'openrouter:openai/gpt-4o-mini',
+  'openrouter:meta-llama/llama-3.3-70b-instruct'
 ]
 
 export function shuffle<T>(array: T[]): T[] {

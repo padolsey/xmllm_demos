@@ -16,7 +16,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@uiw/react-codemirror": "^4.23.6",
-    "next": "15.0.3",
+    "next": "15.0.7",
     "postcss": "^8",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
@@ -36,7 +36,7 @@
     "react-markdown": "^9.0.1",
     "react-syntax-highlighter": "^15.6.1",
     "sonner": "^1.7.1",
-    "xmllm": "^0.3.4",
+    "xmllm": "^0.3.9",
     "zustand": "^5.0.2"
   }
 }
