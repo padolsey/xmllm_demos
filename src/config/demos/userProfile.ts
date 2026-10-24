@@ -1,5 +1,5 @@
 import { LiveProfile } from '../../components/LiveProfile'
-import { xmllm } from 'xmllm/client'
+import { xmllm, types } from 'xmllm/client'
 import type { PipelineHelpers } from 'xmllm'
 import type { DemoConfig } from '../../types/demos'
 
@@ -79,7 +79,8 @@ export const userProfileDemo: DemoConfig = {
         location: String,
         favorite_color: {
           $hex: String,
-          $$text: String
+          // This nested element may not exist yet in a partial XML stream.
+          $$text: types.string()
         }
       },
       hobbies: {
@@ -174,4 +175,4 @@ export const userProfileDemo: DemoConfig = {
       console.error('Simulation error:', error)
     }
   }
-} 
+}
