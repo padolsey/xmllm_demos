@@ -18,7 +18,7 @@ interface NewsArticle {
 interface AnalysisResult {
   article: NewsArticle[]
   top_topic: string[]
-  overallSentiment: string
+  overall_sentiment: string
   metadata: {
     processedAt: Date
     articleCount: number
@@ -37,7 +37,7 @@ const analysisSchema = {
     readingTime: Number
   }],
   top_topic: ["Most frequent topics across all articles"],
-  overallSentiment: "General sentiment across all articles",
+  overall_sentiment: "General sentiment across all articles",
   metadata: {
     processedAt: (el: XMLElement) => new Date(el.$$text),
     articleCount: Number
@@ -56,7 +56,7 @@ const analysisHints = {
     readingTime: "Estimated reading time in minutes"
   }],
   top_topic: ["Most frequent topics across all articles"],
-  overallSentiment: "General sentiment across all articles",
+  overall_sentiment: "General sentiment across all articles",
   metadata: {
     processedAt: "Current timestamp in ISO format",
     articleCount: "Total number of articles analyzed"
@@ -152,7 +152,7 @@ export default function ComplexTypescript() {
         `Summarize these findings:
          - Found ${analysis.article.length} articles
          - Top topics: ${analysis.top_topic.join(', ')}
-         - Overall sentiment: ${analysis.overallSentiment}
+         - Overall sentiment: ${analysis.overall_sentiment || 'Not provided'}
          
          Format as <summary>...</summary>`,
         {
@@ -210,4 +210,4 @@ export default function ComplexTypescript() {
       </pre>
     </div>
   )
-} 
+}
